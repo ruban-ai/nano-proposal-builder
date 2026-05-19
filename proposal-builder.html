@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Enterprise Proposal Builder — Nano LMS · Sales Tool</title>
+<meta name="robots" content="noindex,nofollow"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<script src="https://unpkg.com/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+<script src="https://unpkg.com/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Inter',sans-serif;background:#f4f5f7;color:#111827;-webkit-font-smoothing:antialiased;}
+::-webkit-scrollbar{width:6px;height:6px;}
+::-webkit-scrollbar-thumb{background:#d1d5db;border-radius:3px;}
+::-webkit-scrollbar-thumb:hover{background:#9CA3AF;}
+input,select,textarea,button{font-family:inherit;}
+
+/* ── Top toolbar ── */
+.toolbar{position:sticky;top:0;z-index:50;background:#0F1117;color:#fff;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;box-shadow:0 2px 10px rgba(0,0,0,0.15);}
+.tb-left{display:flex;align-items:center;gap:12px;}
+.tb-logo{width:30px;height:30px;border-radius:7px;background:linear-gradient(135deg,#8B5CF6,#7C3AED);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;}
+.tb-title{font-size:14px;font-weight:700;}
+.tb-pill{font-size:10px;font-weight:700;padding:3px 9px;border-radius:999px;background:#7C3AED;color:#fff;letter-spacing:0.05em;text-transform:uppercase;}
+.tb-pill.warn{background:#f59e0b;}
+.tb-status{font-size:12px;color:#9CA3AF;display:flex;align-items:center;gap:6px;}
+.tb-status::before{content:'';width:6px;height:6px;border-radius:50%;background:#10b981;display:inline-block;}
+.tb-right{display:flex;align-items:center;gap:8px;}
+.tb-rep{display:flex;align-items:center;gap:8px;font-size:12px;color:#9CA3AF;padding-right:8px;border-right:1px solid #2A2D38;margin-right:4px;}
+.tb-rep-avatar{width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,#7C3AED,#0D9488);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;}
+.tb-btn{background:#1A1D26;border:1px solid #2A2D38;color:#D1D5DB;font-size:12px;font-weight:600;padding:6px 12px;border-radius:7px;cursor:pointer;transition:all 0.15s;display:inline-flex;align-items:center;gap:5px;}
+.tb-btn:hover{background:#2A2D38;color:#fff;}
+.tb-btn.primary{background:linear-gradient(135deg,#7C3AED,#6D28D9);border:none;color:#fff;}
+.tb-btn.primary:hover{box-shadow:0 2px 12px rgba(124,58,237,0.5);}
+
+/* ── Page split ── */
+.page{display:grid;grid-template-columns:480px 1fr;gap:0;height:calc(100vh - 56px);}
+.editor{background:#fff;border-right:1px solid #e5e7eb;overflow-y:auto;padding:24px;}
+.preview{background:#e7e9ec;overflow-y:auto;padding:32px;display:flex;justify-content:center;}
+
+/* ── Editor ── */
+.editor-section{margin-bottom:28px;}
+.editor-section:last-child{margin-bottom:0;}
+.section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #f3f4f6;}
+.section-title{font-size:11px;font-weight:800;color:#7C3AED;letter-spacing:0.1em;text-transform:uppercase;display:flex;align-items:center;gap:6px;}
+.section-title::before{content:'';width:3px;height:14px;background:#7C3AED;border-radius:2px;}
+.section-collapse{font-size:11px;color:#9CA3AF;background:none;border:none;cursor:pointer;}
+.section-body{display:flex;flex-direction:column;gap:10px;}
+
+/* Field */
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.field{display:flex;flex-direction:column;gap:5px;}
+.field.full{grid-column:1/-1;}
+.field-label{font-size:11px;font-weight:600;color:#6B7280;}
+.field-label .req{color:#dc2626;}
+input[type="text"],input[type="email"],input[type="number"],input[type="date"],select,textarea{padding:9px 12px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;font-size:13px;color:#111827;outline:none;transition:all 0.15s;font-family:'Inter',sans-serif;}
+input:focus,select:focus,textarea:focus{border-color:#7C3AED;background:#fff;box-shadow:0 0 0 3px rgba(124,58,237,0.08);}
+textarea{resize:vertical;min-height:60px;line-height:1.5;}
+
+/* Number with unit */
+.input-unit{position:relative;}
+.input-unit input{padding-right:54px;width:100%;}
+.input-unit .unit-suffix{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:11px;color:#9CA3AF;font-weight:500;pointer-events:none;}
+
+/* Slider style number input */
+.qty-row{display:grid;grid-template-columns:1fr 100px 90px;gap:8px;align-items:end;}
+
+/* Line item rows */
+.line-item{background:#fafbfc;border:1px solid #e5e7eb;border-radius:10px;padding:12px;display:grid;grid-template-columns:1fr 90px 90px 28px;gap:8px;align-items:center;}
+.line-item-name{font-size:13px;font-weight:600;color:#111827;}
+.line-item-desc{font-size:11px;color:#9CA3AF;margin-top:2px;}
+.line-item input{padding:6px 9px;font-size:12px;}
+.btn-remove{width:24px;height:24px;border:none;background:#f3f4f6;color:#9CA3AF;border-radius:6px;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;transition:all 0.15s;}
+.btn-remove:hover{background:#fef2f2;color:#dc2626;}
+
+/* Toggle row */
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:#fafbfc;border:1px solid #e5e7eb;border-radius:10px;cursor:pointer;transition:all 0.15s;}
+.toggle-row:hover{border-color:#c4b5fd;background:#f5f3ff;}
+.toggle-row.on{border-color:#7C3AED;background:#f5f3ff;}
+.toggle-info{display:flex;align-items:center;gap:10px;}
+.toggle-icon{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px;background:#fff;border:1px solid #e5e7eb;}
+.toggle-row.on .toggle-icon{background:#7C3AED;border-color:#7C3AED;color:#fff;}
+.toggle-text{display:flex;flex-direction:column;}
+.toggle-name{font-size:12px;font-weight:600;color:#111827;}
+.toggle-desc{font-size:10px;color:#9CA3AF;margin-top:1px;}
+.toggle-price{font-size:11px;color:#7C3AED;font-weight:700;}
+.toggle-row.on .toggle-price{color:#6D28D9;}
+.toggle-switch{width:32px;height:18px;border-radius:999px;background:#e5e7eb;position:relative;flex-shrink:0;transition:background 0.2s;}
+.toggle-switch::after{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:#fff;transition:left 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.2);}
+.toggle-row.on .toggle-switch{background:#7C3AED;}
+.toggle-row.on .toggle-switch::after{left:16px;}
+.toggle-row input[type="checkbox"]{display:none;}
+
+/* Add line button */
+.btn-add{width:100%;padding:9px;background:#fff;border:1px dashed #c4b5fd;color:#7C3AED;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.15s;}
+.btn-add:hover{background:#f5f3ff;border-color:#7C3AED;border-style:solid;}
+
+/* Discount pills */
+.discount-pills{display:flex;gap:6px;flex-wrap:wrap;}
+.discount-pill{padding:5px 11px;border-radius:999px;font-size:11px;border:1px solid #e5e7eb;background:#fff;color:#6B7280;cursor:pointer;transition:all 0.15s;font-weight:500;}
+.discount-pill:hover{border-color:#c4b5fd;color:#7C3AED;}
+.discount-pill.on{background:#f5f3ff;border-color:#7C3AED;color:#7C3AED;font-weight:600;}
+
+/* ── PREVIEW (proposal sheet) ── */
+.proposal-sheet{background:#fff;width:816px;min-height:1056px;box-shadow:0 8px 32px rgba(0,0,0,0.12);padding:56px 64px;font-size:11px;color:#1f2937;line-height:1.5;border-radius:4px;}
+@media print {
+  body{background:#fff;}
+  .toolbar,.editor,.preview{display:none;}
+  .proposal-sheet{box-shadow:none;width:100%;min-height:auto;padding:0;border-radius:0;}
+  #printArea{display:block !important;}
+}
+
+/* Proposal contents */
+.p-header{display:flex;justify-content:space-between;align-items:flex-start;padding-bottom:24px;border-bottom:2px solid #111827;margin-bottom:32px;}
+.p-logo{display:flex;align-items:center;gap:10px;}
+.p-logo-mark{width:38px;height:38px;border-radius:9px;background:linear-gradient(135deg,#7C3AED,#6D28D9);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;color:#fff;}
+.p-logo-text{display:flex;flex-direction:column;}
+.p-logo-name{font-size:17px;font-weight:800;color:#111827;letter-spacing:-0.4px;}
+.p-logo-sub{font-size:10px;color:#9CA3AF;}
+.p-meta{text-align:right;}
+.p-meta-title{font-size:28px;font-weight:900;color:#111827;letter-spacing:-1px;line-height:1;margin-bottom:6px;}
+.p-meta-line{font-size:10px;color:#6B7280;line-height:1.6;}
+.p-meta-line strong{color:#111827;font-weight:700;}
+
+.p-parties{display:grid;grid-template-columns:1fr 1fr;gap:48px;margin-bottom:32px;}
+.p-party-label{font-size:9px;font-weight:800;color:#9CA3AF;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px;}
+.p-party-name{font-size:14px;font-weight:700;color:#111827;margin-bottom:3px;}
+.p-party-detail{font-size:10px;color:#6B7280;line-height:1.6;}
+
+.p-intro{background:#f9fafb;border-left:3px solid #7C3AED;padding:14px 16px;margin-bottom:28px;font-size:11px;color:#374151;line-height:1.6;border-radius:0 6px 6px 0;}
+
+.p-section-title{font-size:11px;font-weight:800;color:#111827;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #e5e7eb;}
+
+/* Line item table */
+.p-table{width:100%;border-collapse:collapse;margin-bottom:24px;}
+.p-table thead{background:#f9fafb;}
+.p-table th{padding:9px 12px;text-align:left;font-size:9px;font-weight:700;color:#6B7280;letter-spacing:0.06em;text-transform:uppercase;}
+.p-table th:nth-child(2),.p-table th:nth-child(3),.p-table th:nth-child(4){text-align:right;}
+.p-table td{padding:10px 12px;font-size:11px;border-bottom:1px solid #f3f4f6;}
+.p-table td:nth-child(2),.p-table td:nth-child(3),.p-table td:nth-child(4){text-align:right;}
+.p-table td:nth-child(4){font-weight:700;color:#111827;}
+.p-item-name{font-weight:600;color:#111827;}
+.p-item-desc{font-size:10px;color:#9CA3AF;margin-top:2px;line-height:1.45;}
+.p-group-row td{background:#fafbfc;font-size:9px;font-weight:800;color:#7C3AED;letter-spacing:0.06em;text-transform:uppercase;padding:6px 12px;}
+
+.p-totals{margin-left:auto;width:50%;}
+.p-total-row{display:flex;justify-content:space-between;padding:6px 0;font-size:11px;color:#374151;}
+.p-total-row.discount{color:#0D9488;}
+.p-total-row.tax{color:#6B7280;}
+.p-total-row.grand{border-top:2px solid #111827;margin-top:6px;padding-top:10px;font-size:15px;font-weight:800;color:#111827;}
+.p-total-row.grand span:last-child{font-size:20px;color:#7C3AED;}
+
+.p-contract-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:24px 0;padding:16px;background:#f9fafb;border-radius:8px;}
+.p-contract-cell-label{font-size:9px;font-weight:700;color:#9CA3AF;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:4px;}
+.p-contract-cell-val{font-size:12px;font-weight:700;color:#111827;}
+
+.p-notes{font-size:10px;color:#6B7280;line-height:1.6;margin-bottom:28px;padding:14px 16px;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;}
+.p-notes strong{color:#92400e;}
+
+.p-sigs{display:grid;grid-template-columns:1fr 1fr;gap:48px;margin-top:36px;padding-top:24px;border-top:1px solid #e5e7eb;}
+.p-sig-line{margin-bottom:6px;border-bottom:1px solid #111827;height:32px;}
+.p-sig-label{font-size:9px;color:#9CA3AF;letter-spacing:0.06em;text-transform:uppercase;}
+.p-sig-name{font-size:11px;font-weight:600;color:#111827;margin-top:2px;}
+.p-sig-role{font-size:10px;color:#6B7280;}
+
+.p-footer{margin-top:36px;padding-top:18px;border-top:1px solid #e5e7eb;text-align:center;font-size:9px;color:#9CA3AF;line-height:1.6;}
+
+/* ── Validity badge ── */
+.deal-summary-card{background:linear-gradient(135deg,#f5f3ff,#ede9fe);border:1px solid #ddd6fe;border-radius:10px;padding:14px;margin-bottom:18px;}
+.dsc-title{font-size:10px;font-weight:800;color:#6D28D9;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px;}
+.dsc-total{font-size:24px;font-weight:900;color:#7C3AED;letter-spacing:-1px;line-height:1.1;}
+.dsc-period{font-size:11px;color:#6B7280;margin-top:2px;}
+.dsc-breakdown{display:flex;justify-content:space-between;padding-top:10px;margin-top:10px;border-top:1px solid #ddd6fe;}
+.dsc-cell-label{font-size:9px;color:#9CA3AF;}
+.dsc-cell-val{font-size:11px;font-weight:700;color:#111827;}
+
+@media(max-width:1200px){.page{grid-template-columns:1fr;height:auto;}.editor{border-right:none;border-bottom:1px solid #e5e7eb;}.proposal-sheet{width:100%;}}
+</style>
+</head>
+<body>
+
+<!-- ─── TOOLBAR ─── -->
+<div class="toolbar">
+  <div class="tb-left">
+    <div class="tb-logo">N</div>
+    <div>
+      <div class="tb-title">Enterprise Proposal Builder</div>
+      <div class="tb-status">Auto-saved · just now</div>
+    </div>
+    <span class="tb-pill warn">Internal · Sales Tool</span>
+  </div>
+  <div class="tb-right">
+    <div class="tb-rep">
+      <div class="tb-rep-avatar">MC</div>
+      <span><b style="color:#fff;">Marcus Chen</b> · Solutions Consultant</span>
+    </div>
+    <button class="tb-btn" onclick="resetForm()">↺ Reset</button>
+    <button class="tb-btn" onclick="window.print()">🖨 Print</button>
+    <button class="tb-btn primary" onclick="downloadPDF()" id="pdfBtn">📄 Download PDF</button>
+  </div>
+</div>
+
+<!-- ─── PAGE ─── -->
+<div class="page">
+
+  <!-- ============== EDITOR PANEL ============== -->
+  <div class="editor">
+
+    <!-- Live total card -->
+    <div class="deal-summary-card">
+      <div class="dsc-title">Annual contract value</div>
+      <div class="dsc-total">$<span id="dscTotal">0</span></div>
+      <div class="dsc-period" id="dscPeriod">— year, billed annually</div>
+      <div class="dsc-breakdown">
+        <div><div class="dsc-cell-label">Recurring / mo</div><div class="dsc-cell-val" id="dscMonthly">$0</div></div>
+        <div><div class="dsc-cell-label">One-time</div><div class="dsc-cell-val" id="dscOneTime">$0</div></div>
+        <div><div class="dsc-cell-label">Discount</div><div class="dsc-cell-val" id="dscDiscount" style="color:#0D9488;">$0</div></div>
+      </div>
+    </div>
+
+    <!-- Customer Info -->
+    <div class="editor-section">
+      <div class="section-head"><div class="section-title">Customer</div></div>
+      <div class="section-body">
+        <div class="field full">
+          <label class="field-label">Company name <span class="req">*</span></label>
+          <input type="text" id="custCompany" value="Acme Corporation" oninput="renderProposal()"/>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label class="field-label">Primary contact</label>
+            <input type="text" id="custContact" value="Sarah Johnson" oninput="renderProposal()"/>
+          </div>
+          <div class="field">
+            <label class="field-label">Role</label>
+            <input type="text" id="custRole" value="VP, Learning &amp; Development" oninput="renderProposal()"/>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label class="field-label">Email</label>
+            <input type="email" id="custEmail" value="sarah.johnson@acmecorp.com" oninput="renderProposal()"/>
+          </div>
+          <div class="field">
+            <label class="field-label">Phone</label>
+            <input type="text" id="custPhone" value="+1 (415) 555-0100" oninput="renderProposal()"/>
+          </div>
+        </div>
+        <div class="field full">
+          <label class="field-label">Billing address</label>
+          <textarea id="custAddress" oninput="renderProposal()">123 Market Street, Suite 400
+San Francisco, CA 94103
+United States</textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- Deal Info -->
+    <div class="editor-section">
+      <div class="section-head"><div class="section-title">Deal details</div></div>
+      <div class="section-body">
+        <div class="field-row">
+          <div class="field">
+            <label class="field-label">Proposal #</label>
+            <input type="text" id="propNum" value="NANO-2026-0847" oninput="renderProposal()"/>
+          </div>
+          <div class="field">
+            <label class="field-label">Issued</label>
+            <input type="date" id="propDate" oninput="renderProposal()"/>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label class="field-label">Valid until</label>
+            <input type="date" id="propValid" oninput="renderProposal()"/>
+          </div>
+          <div class="field">
+            <label class="field-label">Contract term</label>
+            <select id="dealTerm" onchange="renderProposal()">
+              <option value="1">1 year</option>
+              <option value="2" selected>2 years</option>
+              <option value="3">3 years</option>
+            </select>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label class="field-label">Billing cycle</label>
+            <select id="dealBilling" onchange="renderProposal()">
+              <option value="annual" selected>Annual upfront</option>
+              <option value="quarterly">Quarterly</option>
+              <option value="monthly">Monthly</option>
+            </select>
+          </div>
+          <div class="field">
+            <label class="field-label">Start date</label>
+            <input type="date" id="dealStart" oninput="renderProposal()"/>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Plan Configuration -->
+    <div class="editor-section">
+      <div class="section-head"><div class="section-title">Plan configuration</div></div>
+      <div class="section-body">
+        <div class="line-item" id="li-trainers">
+          <div>
+            <div class="line-item-name">Trainer seats</div>
+            <div class="line-item-desc">Build courses, run programs, view analytics</div>
+          </div>
+          <input type="number" min="1" value="10" id="qtyTrainers" oninput="renderProposal()"/>
+          <input type="number" step="0.01" value="15.00" id="priceTrainers" readonly title="Locked: $15.00/seat/month" style="background:#f3f4f6;color:#9CA3AF;cursor:not-allowed;"/>
+          <span></span>
+        </div>
+        <div class="line-item" id="li-learners">
+          <div>
+            <div class="line-item-name">Learner seats</div>
+            <div class="line-item-desc">Volume tier discount auto-applied (&gt;500)</div>
+          </div>
+          <input type="number" min="1" value="800" id="qtyLearners" oninput="renderProposal()"/>
+          <input type="number" step="0.01" value="0.85" id="priceLearners" readonly title="Locked: $0.85/seat/month (volume tier)" style="background:#f3f4f6;color:#9CA3AF;cursor:not-allowed;"/>
+          <span></span>
+        </div>
+        <div class="line-item">
+          <div>
+            <div class="line-item-name">AI credit pool / month</div>
+            <div class="line-item-desc">Custom monthly allocation, $1 per 100</div>
+          </div>
+          <input type="number" min="0" step="100" value="10000" id="qtyCredits" oninput="renderProposal()"/>
+          <input type="number" step="0.01" value="0.01" id="priceCredits" readonly title="Locked: $0.01/credit ($1 per 100)" style="background:#f3f4f6;color:#9CA3AF;cursor:not-allowed;"/>
+          <span></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Premium Features (toggles) -->
+    <div class="editor-section">
+      <div class="section-head"><div class="section-title">Premium features (monthly)</div></div>
+      <div class="section-body">
+        <label class="toggle-row on" data-feature="sso">
+          <div class="toggle-info">
+            <div class="toggle-icon">🔐</div>
+            <div class="toggle-text">
+              <div class="toggle-name">SSO + SCIM</div>
+              <div class="toggle-desc">Okta, Google, Azure AD, generic SAML</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span class="toggle-price">$199/mo</span>
+            <div class="toggle-switch"></div>
+            <input type="checkbox" checked data-price="199"/>
+          </div>
+        </label>
+        <label class="toggle-row on" data-feature="hris">
+          <div class="toggle-info">
+            <div class="toggle-icon">🔄</div>
+            <div class="toggle-text">
+              <div class="toggle-name">HRIS sync</div>
+              <div class="toggle-desc">Workday, BambooHR, Rippling, HiBob</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span class="toggle-price">$149/mo</span>
+            <div class="toggle-switch"></div>
+            <input type="checkbox" checked data-price="149"/>
+          </div>
+        </label>
+        <label class="toggle-row on" data-feature="whitelabel">
+          <div class="toggle-info">
+            <div class="toggle-icon">🎨</div>
+            <div class="toggle-text">
+              <div class="toggle-name">White-label academy</div>
+              <div class="toggle-desc">Custom domain, brand, theme, emails</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span class="toggle-price">$99/mo</span>
+            <div class="toggle-switch"></div>
+            <input type="checkbox" checked data-price="99"/>
+          </div>
+        </label>
+        <label class="toggle-row" data-feature="video">
+          <div class="toggle-info">
+            <div class="toggle-icon">🎬</div>
+            <div class="toggle-text">
+              <div class="toggle-name">AI Avatar Video (100 min/mo)</div>
+              <div class="toggle-desc">Lifelike avatar narration in courses</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span class="toggle-price">$90/mo</span>
+            <div class="toggle-switch"></div>
+            <input type="checkbox" data-price="90"/>
+          </div>
+        </label>
+        <label class="toggle-row" data-feature="onprem">
+          <div class="toggle-info">
+            <div class="toggle-icon">🏢</div>
+            <div class="toggle-text">
+              <div class="toggle-name">Private cloud deployment</div>
+              <div class="toggle-desc">Dedicated tenant, region-pinned</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span class="toggle-price">$500/mo</span>
+            <div class="toggle-switch"></div>
+            <input type="checkbox" data-price="500"/>
+          </div>
+        </label>
+        <label class="toggle-row on" data-feature="csm">
+          <div class="toggle-info">
+            <div class="toggle-icon">🤝</div>
+            <div class="toggle-text">
+              <div class="toggle-name">Dedicated CSM + 99.9% SLA</div>
+              <div class="toggle-desc">Named CSM, Slack channel, priority support</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span class="toggle-price">$250/mo</span>
+            <div class="toggle-switch"></div>
+            <input type="checkbox" checked data-price="250"/>
+          </div>
+        </label>
+      </div>
+    </div>
+
+    <!-- Professional Services -->
+    <div class="editor-section">
+      <div class="section-head"><div class="section-title">Professional services (one-time)</div></div>
+      <div class="section-body" id="servicesList">
+        <div class="line-item" data-service="onboarding">
+          <div>
+            <div class="line-item-name">Onboarding &amp; implementation</div>
+            <div class="line-item-desc">6-week guided rollout, SSO setup, content migration</div>
+          </div>
+          <input type="number" min="1" value="1" oninput="renderProposal()"/>
+          <input type="number" step="0.01" value="4500" oninput="renderProposal()"/>
+          <button class="btn-remove" onclick="this.parentElement.remove();renderProposal();">✕</button>
+        </div>
+        <div class="line-item" data-service="training">
+          <div>
+            <div class="line-item-name">Admin training (3 sessions)</div>
+            <div class="line-item-desc">Live training for trainers + admins</div>
+          </div>
+          <input type="number" min="1" value="1" oninput="renderProposal()"/>
+          <input type="number" step="0.01" value="1500" oninput="renderProposal()"/>
+          <button class="btn-remove" onclick="this.parentElement.remove();renderProposal();">✕</button>
+        </div>
+        <button class="btn-add" onclick="addService()">+ Add service line</button>
+      </div>
+    </div>
+
+    <!-- Discounts -->
+    <div class="editor-section">
+      <div class="section-head"><div class="section-title">Discount</div></div>
+      <div class="section-body">
+        <div class="discount-pills" id="discountPills">
+          <button class="discount-pill" data-disc="0">No discount</button>
+          <button class="discount-pill" data-disc="5">5%</button>
+          <button class="discount-pill on" data-disc="10">10%</button>
+          <button class="discount-pill" data-disc="15">15%</button>
+          <button class="discount-pill" data-disc="20">20%</button>
+          <button class="discount-pill" data-disc="custom">Custom</button>
+        </div>
+        <div class="field-row" id="customDiscountRow" style="display:none;">
+          <div class="field">
+            <label class="field-label">Custom %</label>
+            <div class="input-unit">
+              <input type="number" id="customDiscPct" min="0" max="50" value="12" oninput="renderProposal()"/>
+              <span class="unit-suffix">%</span>
+            </div>
+          </div>
+          <div class="field">
+            <label class="field-label">Reason (internal)</label>
+            <input type="text" id="discReason" value="Multi-year, strategic logo" oninput="renderProposal()"/>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Terms & Notes -->
+    <div class="editor-section">
+      <div class="section-head"><div class="section-title">Notes &amp; terms</div></div>
+      <div class="section-body">
+        <div class="field full">
+          <label class="field-label">Intro note (shown on proposal)</label>
+          <textarea id="introNote" oninput="renderProposal()">Thank you for considering Nano LMS. This proposal outlines a custom Enterprise plan tailored to Acme Corp's 800-learner global rollout, including SSO, HRIS sync, and a dedicated success team. All pricing is locked for the duration of the contract.</textarea>
+        </div>
+        <div class="field full">
+          <label class="field-label">Special terms (footer)</label>
+          <textarea id="specialTerms" oninput="renderProposal()">Net 30 payment terms · Auto-renewal with 30-day opt-out · Pricing locked for term · Mutual NDA in effect.</textarea>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ============== PREVIEW PANEL ============== -->
+  <div class="preview">
+    <div class="proposal-sheet" id="printArea">
+
+      <!-- Header -->
+      <div class="p-header">
+        <div class="p-logo">
+          <div class="p-logo-mark">N</div>
+          <div class="p-logo-text">
+            <div class="p-logo-name">Nano LMS</div>
+            <div class="p-logo-sub">by Animaker, Inc.</div>
+          </div>
+        </div>
+        <div class="p-meta">
+          <div class="p-meta-title">Proposal</div>
+          <div class="p-meta-line"><strong>#</strong> <span id="pNum">NANO-2026-0847</span></div>
+          <div class="p-meta-line"><strong>Issued:</strong> <span id="pDate">—</span></div>
+          <div class="p-meta-line"><strong>Valid through:</strong> <span id="pValid">—</span></div>
+        </div>
+      </div>
+
+      <!-- Parties -->
+      <div class="p-parties">
+        <div>
+          <div class="p-party-label">Prepared by</div>
+          <div class="p-party-name">Nano LMS · Animaker, Inc.</div>
+          <div class="p-party-detail">
+            548 Market Street, #62128<br/>
+            San Francisco, CA 94104<br/>
+            Tax ID: 84-2939183<br/>
+            <strong style="color:#111827;">Marcus Chen</strong>, Solutions Consultant<br/>
+            marcus@nano.ai · +1 (415) 555-2099
+          </div>
+        </div>
+        <div>
+          <div class="p-party-label">Prepared for</div>
+          <div class="p-party-name" id="pCustCompany">Acme Corporation</div>
+          <div class="p-party-detail">
+            <span id="pCustAddress">—</span><br/>
+            <strong style="color:#111827;" id="pCustContact">—</strong>, <span id="pCustRole">—</span><br/>
+            <span id="pCustEmail">—</span> · <span id="pCustPhone">—</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Intro -->
+      <div class="p-intro" id="pIntro">—</div>
+
+      <!-- Investment summary -->
+      <div class="p-section-title">Investment summary</div>
+      <table class="p-table" id="pTable">
+        <thead>
+          <tr>
+            <th style="width:54%;">Item</th>
+            <th style="width:14%;">Qty</th>
+            <th style="width:16%;">Unit price</th>
+            <th style="width:16%;">Amount</th>
+          </tr>
+        </thead>
+        <tbody id="pTableBody"></tbody>
+      </table>
+
+      <!-- Totals -->
+      <div class="p-totals" id="pTotals">
+        <div class="p-total-row"><span>Monthly subtotal</span><span id="pMonthly">$0.00</span></div>
+        <div class="p-total-row"><span>Annual subtotal (recurring × <span id="pTerm">12</span>)</span><span id="pRecurringAnnual">$0.00</span></div>
+        <div class="p-total-row"><span>Professional services (one-time)</span><span id="pOneTime">$0.00</span></div>
+        <div class="p-total-row discount" id="pDiscountRow" style="display:none;"><span>Discount (<span id="pDiscPct">10</span>%)</span><span id="pDiscount">-$0.00</span></div>
+        <div class="p-total-row tax"><span>Tax</span><span>To be assessed</span></div>
+        <div class="p-total-row grand">
+          <span>Total contract value</span><span>$<span id="pGrand">0.00</span></span>
+        </div>
+      </div>
+
+      <!-- Contract details -->
+      <div class="p-section-title" style="margin-top:24px;">Contract details</div>
+      <div class="p-contract-grid">
+        <div>
+          <div class="p-contract-cell-label">Contract term</div>
+          <div class="p-contract-cell-val" id="pCTerm">2 years</div>
+        </div>
+        <div>
+          <div class="p-contract-cell-label">Billing cycle</div>
+          <div class="p-contract-cell-val" id="pCBilling">Annual upfront</div>
+        </div>
+        <div>
+          <div class="p-contract-cell-label">Start date</div>
+          <div class="p-contract-cell-val" id="pCStart">—</div>
+        </div>
+        <div>
+          <div class="p-contract-cell-label">Auto-renewal</div>
+          <div class="p-contract-cell-val">Yes · 30d notice</div>
+        </div>
+      </div>
+
+      <!-- Notes -->
+      <div class="p-notes" id="pSpecialTerms">—</div>
+
+      <!-- Signatures -->
+      <div class="p-sigs">
+        <div>
+          <div class="p-sig-line"></div>
+          <div class="p-sig-label">Authorized signatory · <span id="pSigCust">Acme Corporation</span></div>
+          <div class="p-sig-name" id="pSigCustName">Sarah Johnson</div>
+          <div class="p-sig-role" id="pSigCustRole">VP, Learning &amp; Development</div>
+        </div>
+        <div>
+          <div class="p-sig-line"></div>
+          <div class="p-sig-label">For Nano LMS · Animaker, Inc.</div>
+          <div class="p-sig-name">Marcus Chen</div>
+          <div class="p-sig-role">Solutions Consultant</div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="p-footer">
+        <div>This proposal is confidential and prepared exclusively for the named recipient. Pricing is valid through the date listed above.</div>
+        <div style="margin-top:6px;">Nano LMS · animaker.com/nano · © 2026 Animaker, Inc.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Initial dates ──
+const today = new Date();
+const fmt = d => d.toISOString().split('T')[0];
+document.getElementById('propDate').value = fmt(today);
+const validDate = new Date(today); validDate.setDate(validDate.getDate() + 30);
+document.getElementById('propValid').value = fmt(validDate);
+const startDate = new Date(today); startDate.setDate(startDate.getDate() + 14);
+document.getElementById('dealStart').value = fmt(startDate);
+
+// ── Discount pills ──
+let currentDiscount = 10;
+document.querySelectorAll('.discount-pill').forEach(pill => {
+  pill.addEventListener('click', () => {
+    document.querySelectorAll('.discount-pill').forEach(p => p.classList.remove('on'));
+    pill.classList.add('on');
+    const val = pill.dataset.disc;
+    if (val === 'custom') {
+      document.getElementById('customDiscountRow').style.display = 'grid';
+      currentDiscount = +document.getElementById('customDiscPct').value;
+    } else {
+      document.getElementById('customDiscountRow').style.display = 'none';
+      currentDiscount = +val;
+    }
+    renderProposal();
+  });
+});
+document.getElementById('customDiscPct').addEventListener('input', e => {
+  if (document.querySelector('.discount-pill[data-disc="custom"]').classList.contains('on')) {
+    currentDiscount = +e.target.value;
+    renderProposal();
+  }
+});
+
+// ── Toggle rows ──
+document.querySelectorAll('.toggle-row').forEach(row => {
+  const cb = row.querySelector('input[type="checkbox"]');
+  row.addEventListener('click', e => {
+    if (e.target.tagName === 'INPUT') return;
+    cb.checked = !cb.checked;
+    row.classList.toggle('on', cb.checked);
+    renderProposal();
+  });
+});
+
+// ── Add service line ──
+let serviceId = 100;
+function addService() {
+  const list = document.getElementById('servicesList');
+  const btn = list.querySelector('.btn-add');
+  const div = document.createElement('div');
+  div.className = 'line-item';
+  div.dataset.service = 'custom-' + serviceId++;
+  div.innerHTML = `
+    <div>
+      <input type="text" placeholder="Service name" style="background:none;border:none;font-size:13px;font-weight:600;padding:0;margin-bottom:4px;outline:none;" oninput="renderProposal()" value="Custom integration"/>
+      <input type="text" placeholder="Description (optional)" style="background:none;border:none;font-size:11px;color:#9CA3AF;padding:0;outline:none;width:100%;" oninput="renderProposal()" value=""/>
+    </div>
+    <input type="number" min="1" value="1" oninput="renderProposal()"/>
+    <input type="number" step="0.01" value="1000" oninput="renderProposal()"/>
+    <button class="btn-remove" onclick="this.parentElement.remove();renderProposal();">✕</button>`;
+  list.insertBefore(div, btn);
+  renderProposal();
+}
+
+// ── Render proposal ──
+function renderProposal() {
+  // Customer
+  document.getElementById('pCustCompany').textContent = val('custCompany');
+  document.getElementById('pCustAddress').innerHTML = val('custAddress').replace(/\n/g,'<br/>');
+  document.getElementById('pCustContact').textContent = val('custContact');
+  document.getElementById('pCustRole').textContent = val('custRole');
+  document.getElementById('pCustEmail').textContent = val('custEmail');
+  document.getElementById('pCustPhone').textContent = val('custPhone');
+  document.getElementById('pSigCust').textContent = val('custCompany');
+  document.getElementById('pSigCustName').textContent = val('custContact');
+  document.getElementById('pSigCustRole').textContent = val('custRole');
+
+  // Deal
+  document.getElementById('pNum').textContent = val('propNum');
+  document.getElementById('pDate').textContent = formatDate(val('propDate'));
+  document.getElementById('pValid').textContent = formatDate(val('propValid'));
+  document.getElementById('pCStart').textContent = formatDate(val('dealStart'));
+  const termYears = +val('dealTerm');
+  document.getElementById('pCTerm').textContent = termYears + (termYears === 1 ? ' year' : ' years');
+  document.getElementById('pTerm').textContent = termYears * 12;
+  const billing = val('dealBilling');
+  document.getElementById('pCBilling').textContent = {annual:'Annual upfront',quarterly:'Quarterly',monthly:'Monthly'}[billing] || billing;
+
+  // Notes
+  document.getElementById('pIntro').textContent = val('introNote');
+  document.getElementById('pSpecialTerms').innerHTML = '<strong>Terms:</strong> ' + val('specialTerms');
+
+  // Compute line items
+  const trainers = { name: 'Trainer seats', desc: 'Build courses, run programs, view analytics', qty: +val('qtyTrainers'), unit: +val('priceTrainers'), period: '/ seat / month' };
+  const learners = { name: 'Learner seats', desc: 'Volume tier — discount applied at >500', qty: +val('qtyLearners'), unit: +val('priceLearners'), period: '/ seat / month' };
+  const credits  = { name: 'AI credit pool', desc: 'Monthly allocation, refreshes each cycle', qty: +val('qtyCredits'), unit: +val('priceCredits'), period: '/ credit / month' };
+
+  const features = [];
+  document.querySelectorAll('.toggle-row').forEach(row => {
+    const cb = row.querySelector('input[type="checkbox"]');
+    if (cb.checked) {
+      features.push({
+        name: row.querySelector('.toggle-name').textContent,
+        desc: row.querySelector('.toggle-desc').textContent,
+        qty: 1,
+        unit: +cb.dataset.price,
+        period: '/ month'
+      });
+    }
+  });
+
+  const services = [];
+  document.querySelectorAll('#servicesList .line-item').forEach(li => {
+    const inputs = li.querySelectorAll('input');
+    let name, desc;
+    const firstChild = li.firstElementChild;
+    if (firstChild.firstElementChild?.tagName === 'INPUT') {
+      name = firstChild.children[0].value;
+      desc = firstChild.children[1].value;
+    } else {
+      name = firstChild.querySelector('.line-item-name').textContent;
+      desc = firstChild.querySelector('.line-item-desc').textContent;
+    }
+    const qty = +inputs[inputs.length - 2].value;
+    const unit = +inputs[inputs.length - 1].value;
+    services.push({ name, desc, qty, unit, period: 'one-time' });
+  });
+
+  // Build table
+  const body = document.getElementById('pTableBody');
+  body.innerHTML = '';
+  // Group: Plan
+  body.innerHTML += `<tr class="p-group-row"><td colspan="4">Plan · monthly recurring</td></tr>`;
+  [trainers, learners, credits].forEach(li => {
+    body.innerHTML += rowHTML(li);
+  });
+  // Group: Premium features
+  if (features.length) {
+    body.innerHTML += `<tr class="p-group-row"><td colspan="4">Premium features · monthly recurring</td></tr>`;
+    features.forEach(li => body.innerHTML += rowHTML(li));
+  }
+  // Group: Services
+  if (services.length) {
+    body.innerHTML += `<tr class="p-group-row"><td colspan="4">Professional services · one-time</td></tr>`;
+    services.forEach(li => body.innerHTML += rowHTML(li));
+  }
+
+  // Totals
+  const monthlyRecurring = (trainers.qty * trainers.unit) + (learners.qty * learners.unit) + (credits.qty * credits.unit) + features.reduce((s, f) => s + f.qty * f.unit, 0);
+  const annualRecurring = monthlyRecurring * 12;
+  const totalRecurring = annualRecurring * termYears;
+  const totalOneTime = services.reduce((s, f) => s + f.qty * f.unit, 0);
+  const beforeDiscount = totalRecurring + totalOneTime;
+  const discountAmount = beforeDiscount * (currentDiscount / 100);
+  const grandTotal = beforeDiscount - discountAmount;
+
+  document.getElementById('pMonthly').textContent = '$' + fmtNum(monthlyRecurring);
+  document.getElementById('pRecurringAnnual').textContent = '$' + fmtNum(totalRecurring);
+  document.getElementById('pOneTime').textContent = '$' + fmtNum(totalOneTime);
+
+  if (currentDiscount > 0) {
+    document.getElementById('pDiscountRow').style.display = 'flex';
+    document.getElementById('pDiscPct').textContent = currentDiscount;
+    document.getElementById('pDiscount').textContent = '-$' + fmtNum(discountAmount);
+  } else {
+    document.getElementById('pDiscountRow').style.display = 'none';
+  }
+  document.getElementById('pGrand').textContent = fmtNum(grandTotal);
+
+  // Summary card
+  document.getElementById('dscTotal').textContent = fmtNum(grandTotal);
+  document.getElementById('dscPeriod').textContent = `${termYears}-year contract, billed ${billing}`;
+  document.getElementById('dscMonthly').textContent = '$' + fmtNum(monthlyRecurring);
+  document.getElementById('dscOneTime').textContent = '$' + fmtNum(totalOneTime);
+  document.getElementById('dscDiscount').textContent = '-$' + fmtNum(discountAmount);
+}
+
+function rowHTML(item) {
+  return `<tr>
+    <td><div class="p-item-name">${escapeHtml(item.name)}</div><div class="p-item-desc">${escapeHtml(item.desc)}</div></td>
+    <td>${item.qty.toLocaleString()}</td>
+    <td>$${fmtNum(item.unit)} <span style="color:#9CA3AF;font-size:9px;">${item.period}</span></td>
+    <td>$${fmtNum(item.qty * item.unit)}</td>
+  </tr>`;
+}
+
+function val(id) { return document.getElementById(id).value; }
+function fmtNum(n) { return n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+function formatDate(s) { if (!s) return '—'; return new Date(s + 'T00:00').toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}); }
+function escapeHtml(s) { return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]); }
+
+// ── Reset ──
+function resetForm() {
+  if (!confirm('Reset proposal to default values?')) return;
+  location.reload();
+}
+
+// ── PDF download ──
+async function downloadPDF() {
+  const btn = document.getElementById('pdfBtn');
+  const orig = btn.innerHTML;
+  btn.innerHTML = '⏳ Generating…';
+  btn.disabled = true;
+  try {
+    const el = document.getElementById('printArea');
+    const canvas = await html2canvas(el, { scale: 2, useCORS: true, backgroundColor: '#ffffff' });
+    const imgData = canvas.toDataURL('image/png');
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({ unit: 'pt', format: 'letter' });
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const imgWidth = pageWidth;
+    const imgHeight = (canvas.height * pageWidth) / canvas.width;
+    let heightLeft = imgHeight;
+    let position = 0;
+    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+    heightLeft -= pageHeight;
+    while (heightLeft > 0) {
+      position -= pageHeight;
+      pdf.addPage();
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+    }
+    const filename = `${val('propNum') || 'proposal'}-${val('custCompany').replace(/\s+/g,'-').toLowerCase()}.pdf`;
+    pdf.save(filename);
+  } catch (err) {
+    alert('PDF generation failed: ' + err.message);
+  } finally {
+    btn.innerHTML = orig;
+    btn.disabled = false;
+  }
+}
+
+// Initial render
+renderProposal();
+</script>
+</body>
+</html>
