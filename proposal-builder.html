@@ -58,6 +58,7 @@ input,select,textarea,button{font-family:inherit;}
 input[type="text"],input[type="email"],input[type="number"],input[type="date"],select,textarea{padding:9px 12px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;font-size:13px;color:#111827;outline:none;transition:all 0.15s;font-family:'Inter',sans-serif;}
 input:focus,select:focus,textarea:focus{border-color:#7C3AED;background:#fff;box-shadow:0 0 0 3px rgba(124,58,237,0.08);}
 textarea{resize:vertical;min-height:60px;line-height:1.5;}
+.char-counter{font-size:10px;color:#6B7280;text-align:right;margin-top:4px;display:block;}
 
 /* Number with unit */
 .input-unit{position:relative;}
@@ -134,7 +135,7 @@ textarea{resize:vertical;min-height:60px;line-height:1.5;}
 .p-section-title{font-size:11px;font-weight:800;color:#111827;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #e5e7eb;}
 
 /* Line item table */
-.p-table{width:100%;border-collapse:collapse;margin-bottom:24px;}
+.p-table{width:100%;border-collapse:collapse;margin-bottom:24px;table-layout:fixed;}
 .p-table thead{background:#f9fafb;}
 .p-table th{padding:9px 12px;text-align:left;font-size:9px;font-weight:700;color:#6B7280;letter-spacing:0.06em;text-transform:uppercase;}
 .p-table th:nth-child(2),.p-table th:nth-child(3),.p-table th:nth-child(4){text-align:right;}
@@ -145,12 +146,17 @@ textarea{resize:vertical;min-height:60px;line-height:1.5;}
 .p-item-desc{font-size:10px;color:#9CA3AF;margin-top:2px;line-height:1.45;}
 .p-group-row td{background:#fafbfc;font-size:9px;font-weight:800;color:#7C3AED;letter-spacing:0.06em;text-transform:uppercase;padding:6px 12px;}
 
-.p-totals{margin-left:auto;width:50%;}
-.p-total-row{display:flex;justify-content:space-between;padding:6px 0;font-size:11px;color:#374151;}
-.p-total-row.discount{color:#0D9488;}
-.p-total-row.tax{color:#6B7280;}
-.p-total-row.grand{border-top:2px solid #111827;margin-top:6px;padding-top:10px;font-size:15px;font-weight:800;color:#111827;}
-.p-total-row.grand span:last-child{font-size:20px;color:#7C3AED;}
+.p-totals{width:100%;border-collapse:collapse;margin-top:0;margin-bottom:24px;table-layout:fixed;}
+.p-totals colgroup col:first-child{width:54%;}
+.p-totals colgroup col:nth-child(2){width:14%;}
+.p-totals colgroup col:nth-child(3){width:16%;}
+.p-totals colgroup col:nth-child(4){width:16%;}
+.p-total-row td{padding:10px 12px;font-size:11px;color:#374151;vertical-align:middle;}
+.p-total-row td:last-child{white-space:nowrap;text-align:right;}
+.p-total-row.discount td{color:#0D9488;}
+.p-total-row.tax td{color:#6B7280;}
+.p-total-row.grand td{border-top:2px solid #111827;padding-top:10px;font-size:15px;font-weight:800;color:#111827;}
+.p-total-row.grand td:last-child{font-size:20px;color:#7C3AED;}
 
 .p-contract-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:24px 0;padding:16px;background:#f9fafb;border-radius:8px;}
 .p-contract-cell-label{font-size:9px;font-weight:700;color:#9CA3AF;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:4px;}
@@ -192,12 +198,7 @@ textarea{resize:vertical;min-height:60px;line-height:1.5;}
     <span class="tb-pill warn">Internal · Sales Tool</span>
   </div>
   <div class="tb-right">
-    <div class="tb-rep">
-      <div class="tb-rep-avatar">MC</div>
-      <span><b style="color:#fff;">Marcus Chen</b> · Solutions Consultant</span>
-    </div>
     <button class="tb-btn" onclick="resetForm()">↺ Reset</button>
-    <button class="tb-btn" onclick="window.print()">🖨 Print</button>
     <button class="tb-btn primary" onclick="downloadPDF()" id="pdfBtn">📄 Download PDF</button>
   </div>
 </div>
@@ -217,6 +218,23 @@ textarea{resize:vertical;min-height:60px;line-height:1.5;}
         <div><div class="dsc-cell-label">Recurring / mo</div><div class="dsc-cell-val" id="dscMonthly">$0</div></div>
         <div><div class="dsc-cell-label">One-time</div><div class="dsc-cell-val" id="dscOneTime">$0</div></div>
         <div><div class="dsc-cell-label">Discount</div><div class="dsc-cell-val" id="dscDiscount" style="color:#0D9488;">$0</div></div>
+      </div>
+    </div>
+
+    <!-- Proposal Owner -->
+    <div class="editor-section">
+      <div class="section-head"><div class="section-title">Proposal Owner</div></div>
+      <div class="section-body">
+        <div class="field-row">
+          <div class="field">
+            <label class="field-label">Owner name</label>
+            <input type="text" id="ownerName" placeholder="Name" oninput="renderProposal()" />
+          </div>
+          <div class="field">
+            <label class="field-label">Owner email</label>
+            <input type="email" id="ownerEmail" placeholder="email@example.com" oninput="renderProposal()" />
+          </div>
+        </div>
       </div>
     </div>
 
@@ -249,10 +267,32 @@ textarea{resize:vertical;min-height:60px;line-height:1.5;}
           </div>
         </div>
         <div class="field full">
-          <label class="field-label">Billing address</label>
-          <textarea id="custAddress" oninput="renderProposal()">123 Market Street, Suite 400
-San Francisco, CA 94103
-United States</textarea>
+          <label class="field-label">Address line 1</label>
+          <input type="text" id="custAddress1" value="123 Market Street" oninput="renderProposal()"/>
+        </div>
+        <div class="field full">
+          <label class="field-label">Address line 2</label>
+          <input type="text" id="custAddress2" value="Suite 400" oninput="renderProposal()"/>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label class="field-label">City</label>
+            <input type="text" id="custCity" value="San Francisco" oninput="renderProposal()"/>
+          </div>
+          <div class="field">
+            <label class="field-label">State</label>
+            <input type="text" id="custState" value="CA" oninput="renderProposal()"/>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label class="field-label">Zip</label>
+            <input type="text" id="custZip" value="94103" oninput="renderProposal()"/>
+          </div>
+          <div class="field">
+            <label class="field-label">Country</label>
+            <input type="text" id="custCountry" value="United States" oninput="renderProposal()"/>
+          </div>
         </div>
       </div>
     </div>
@@ -487,7 +527,8 @@ United States</textarea>
       <div class="section-body">
         <div class="field full">
           <label class="field-label">Intro note (shown on proposal)</label>
-          <textarea id="introNote" oninput="renderProposal()">Thank you for considering Nano LMS. This proposal outlines a custom Enterprise plan tailored to Acme Corp's 800-learner global rollout, including SSO, HRIS sync, and a dedicated success team. All pricing is locked for the duration of the contract.</textarea>
+          <textarea id="introNote" maxlength="180" oninput="renderProposal()">Thank you for considering Nano LMS. This proposal outlines a custom Enterprise plan tailored to Acme Corp's 800-learner global rollout, including SSO, HRIS sync, and a dedicated success team. All pricing is locked for the duration of the contract.</textarea>
+          <span class="char-counter" id="introNoteCounter">0 / 180</span>
         </div>
         <div class="field full">
           <label class="field-label">Special terms (footer)</label>
@@ -525,11 +566,12 @@ United States</textarea>
           <div class="p-party-label">Prepared by</div>
           <div class="p-party-name">Nano LMS · Animaker, Inc.</div>
           <div class="p-party-detail">
-            548 Market Street, #62128<br/>
-            San Francisco, CA 94104<br/>
-            Tax ID: 84-2939183<br/>
-            <strong style="color:#111827;">Marcus Chen</strong>, Solutions Consultant<br/>
-            marcus@nano.ai · +1 (415) 555-2099
+            1160 Battery Street<br/> 
+            Suite 100<br/>
+            San Francisco, CA 94111<br/>
+            United States<br/>
+            <strong style="color:#111827;" id="pOwnerName">—</strong><br/>
+            <span id="pOwnerEmail">—</span>
           </div>
         </div>
         <div>
@@ -561,16 +603,21 @@ United States</textarea>
       </table>
 
       <!-- Totals -->
-      <div class="p-totals" id="pTotals">
-        <div class="p-total-row"><span>Monthly subtotal</span><span id="pMonthly">$0.00</span></div>
-        <div class="p-total-row"><span>Annual subtotal (recurring × <span id="pTerm">12</span>)</span><span id="pRecurringAnnual">$0.00</span></div>
-        <div class="p-total-row"><span>Professional services (one-time)</span><span id="pOneTime">$0.00</span></div>
-        <div class="p-total-row discount" id="pDiscountRow" style="display:none;"><span>Discount (<span id="pDiscPct">10</span>%)</span><span id="pDiscount">-$0.00</span></div>
-        <div class="p-total-row tax"><span>Tax</span><span>To be assessed</span></div>
-        <div class="p-total-row grand">
-          <span>Total contract value</span><span>$<span id="pGrand">0.00</span></span>
-        </div>
-      </div>
+      <table class="p-totals" id="pTotals">
+        <colgroup>
+          <col />
+          <col />
+          <col />
+          <col />
+        </colgroup>
+        <tbody>
+          <tr class="p-total-row"><td colspan="3">Monthly subtotal</td><td id="pMonthly">$0.00</td></tr>
+          <tr class="p-total-row"><td colspan="3">Annual subtotal (recurring × <span id="pTerm">12</span>)</td><td id="pRecurringAnnual">$0.00</td></tr>
+          <tr class="p-total-row"><td colspan="3">Professional services (one-time)</td><td id="pOneTime">$0.00</td></tr>
+          <tr class="p-total-row discount" id="pDiscountRow" style="display:none;"><td colspan="3">Discount (<span id="pDiscPct">10</span>%)</td><td id="pDiscount">-$0.00</td></tr>
+          <tr class="p-total-row grand"><td colspan="3">Total contract value</td><td>$<span id="pGrand">0.00</span></td></tr>
+        </tbody>
+      </table>
 
       <!-- Contract details -->
       <div class="p-section-title" style="margin-top:24px;">Contract details</div>
@@ -607,8 +654,8 @@ United States</textarea>
         <div>
           <div class="p-sig-line"></div>
           <div class="p-sig-label">For Nano LMS · Animaker, Inc.</div>
-          <div class="p-sig-name">Marcus Chen</div>
-          <div class="p-sig-role">Solutions Consultant</div>
+          <div class="p-sig-name" id="pSigOwnerName">—</div>
+          <div class="p-sig-role" id="pSigOwnerEmail">—</div>
         </div>
       </div>
 
@@ -690,9 +737,19 @@ function addService() {
 function renderProposal() {
   // Customer
   document.getElementById('pCustCompany').textContent = val('custCompany');
-  document.getElementById('pCustAddress').innerHTML = val('custAddress').replace(/\n/g,'<br/>');
+  const addressParts = [
+    val('custAddress1'),
+    val('custAddress2'),
+    [val('custCity'), val('custState'), val('custZip')].filter(Boolean).join(', '),
+    val('custCountry')
+  ].filter(Boolean);
+  document.getElementById('pCustAddress').innerHTML = addressParts.join('<br/>');
   document.getElementById('pCustContact').textContent = val('custContact');
   document.getElementById('pCustRole').textContent = val('custRole');
+  document.getElementById('pOwnerName').textContent = val('ownerName') || '—';
+  document.getElementById('pOwnerEmail').textContent = val('ownerEmail') || '—';
+  document.getElementById('pSigOwnerName').textContent = val('ownerName') || '—';
+  document.getElementById('pSigOwnerEmail').textContent = val('ownerEmail') || '—';
   document.getElementById('pCustEmail').textContent = val('custEmail');
   document.getElementById('pCustPhone').textContent = val('custPhone');
   document.getElementById('pSigCust').textContent = val('custCompany');
@@ -711,8 +768,13 @@ function renderProposal() {
   document.getElementById('pCBilling').textContent = {annual:'Annual upfront',quarterly:'Quarterly',monthly:'Monthly'}[billing] || billing;
 
   // Notes
-  document.getElementById('pIntro').textContent = val('introNote');
+  const introText = val('introNote');
+  document.getElementById('pIntro').textContent = introText;
   document.getElementById('pSpecialTerms').innerHTML = '<strong>Terms:</strong> ' + val('specialTerms');
+  const introCounter = document.getElementById('introNoteCounter');
+  if (introCounter) {
+    introCounter.textContent = `${introText.length} / 180`;
+  }
 
   // Compute line items
   const trainers = { name: 'Trainer seats', desc: 'Build courses, run programs, view analytics', qty: +val('qtyTrainers'), unit: +val('priceTrainers'), period: '/ seat / month' };
@@ -783,7 +845,7 @@ function renderProposal() {
   document.getElementById('pOneTime').textContent = '$' + fmtNum(totalOneTime);
 
   if (currentDiscount > 0) {
-    document.getElementById('pDiscountRow').style.display = 'flex';
+    document.getElementById('pDiscountRow').style.display = 'table-row';
     document.getElementById('pDiscPct').textContent = currentDiscount;
     document.getElementById('pDiscount').textContent = '-$' + fmtNum(discountAmount);
   } else {
