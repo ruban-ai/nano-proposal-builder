@@ -10,6 +10,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
 <script src="https://unpkg.com/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 <script src="https://unpkg.com/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'Inter',sans-serif;background:#f4f5f7;color:#111827;-webkit-font-smoothing:antialiased;}
@@ -104,12 +105,66 @@ textarea{resize:vertical;min-height:60px;line-height:1.5;}
 .discount-pill:hover{border-color:#c4b5fd;color:#7C3AED;}
 .discount-pill.on{background:#f5f3ff;border-color:#7C3AED;color:#7C3AED;font-weight:600;}
 
+/* Currency selector */
+.currency-pills{display:flex;gap:6px;}
+.currency-pill{padding:6px 14px;border-radius:999px;font-size:12px;border:1px solid #e5e7eb;background:#fff;color:#6B7280;cursor:pointer;transition:all 0.15s;font-weight:600;}
+.currency-pill:hover{border-color:#c4b5fd;color:#7C3AED;}
+.currency-pill.on{background:#f5f3ff;border-color:#7C3AED;color:#7C3AED;}
+.rate-box{margin-top:10px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:10px 12px;font-size:11px;color:#1d4ed8;font-weight:500;line-height:1.5;}
+.rate-box strong{font-weight:700;}
+.prop-num-badge{padding:9px 12px;background:#f3f4f6;border:1px solid #e5e7eb;border-radius:8px;font-size:13px;color:#7C3AED;font-weight:700;letter-spacing:0.04em;user-select:all;}
+
+/* ── Validation ── */
+.validation-banner{background:#fef2f2;border:1px solid #fca5a5;border-radius:10px;padding:14px 16px;margin-bottom:20px;font-size:12px;color:#991b1b;line-height:1.5;}
+.validation-banner strong{font-weight:700;display:block;margin-bottom:6px;}
+.validation-banner ul{margin:0;padding-left:18px;}
+.validation-banner li{margin-bottom:2px;}
+.field.has-error .field-label{color:#ef4444;}
+.field.has-error input,.field.has-error textarea{border-color:#ef4444 !important;background:#fef2f2 !important;}
+
+/* ── Proposals page ── */
+.proposals-page{display:none;height:calc(100vh - 56px);flex-direction:column;background:#f4f5f7;overflow:hidden;}
+.proposals-page.open{display:flex;}
+.pp-head{background:#fff;border-bottom:1px solid #e5e7eb;padding:16px 32px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;gap:16px;}
+.pp-head-left{display:flex;align-items:center;gap:14px;}
+.pp-head-title{font-size:16px;font-weight:800;color:#111827;}
+.pp-count{font-size:12px;color:#9CA3AF;background:#f3f4f6;padding:3px 10px;border-radius:999px;}
+.pp-head-actions{display:flex;align-items:center;gap:8px;}
+.pp-search{height:36px;padding:0 12px 0 34px;border:1px solid #e5e7eb;border-radius:8px;font-size:13px;width:280px;background:#f9fafb url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='none' viewBox='0 0 24 24' stroke='%239CA3AF' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E") no-repeat 10px center;outline:none;transition:border-color 0.15s;}
+.pp-search:focus{border-color:#7C3AED;background-color:#fff;}
+.pp-btn{height:36px;padding:0 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:all 0.15s;}
+.pp-btn.outline{background:#fff;border:1px solid #e5e7eb;color:#374151;}
+.pp-btn.outline:hover{border-color:#7C3AED;color:#7C3AED;}
+.pp-btn.primary{background:linear-gradient(135deg,#7C3AED,#6D28D9);border:none;color:#fff;}
+.pp-btn.primary:hover{box-shadow:0 2px 10px rgba(124,58,237,0.4);}
+.pp-body{flex:1;overflow-y:auto;padding:24px 32px;}
+.pp-setup{background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:12px 16px;margin-bottom:20px;font-size:11px;color:#92400e;line-height:1.5;}
+.pp-setup strong{font-weight:700;}
+.pp-setup a{color:#7C3AED;text-decoration:underline;}
+.pp-empty{text-align:center;padding:80px 24px;color:#9CA3AF;font-size:14px;line-height:1.8;}
+.pp-table-wrap{background:#fff;border-radius:10px;border:1px solid #e5e7eb;overflow:hidden;}
+.pp-table{width:100%;border-collapse:collapse;font-size:13px;}
+.pp-table th{text-align:left;padding:10px 14px;font-size:10px;font-weight:700;color:#6B7280;letter-spacing:0.06em;text-transform:uppercase;border-bottom:2px solid #e5e7eb;white-space:nowrap;cursor:pointer;user-select:none;background:#fafafa;}
+.pp-table th:hover{color:#7C3AED;}
+.pp-table th .sort-icon{opacity:0.35;margin-left:4px;font-size:9px;}
+.pp-table th.sorted .sort-icon{opacity:1;color:#7C3AED;}
+.pp-table td{padding:12px 14px;border-bottom:1px solid #f3f4f6;vertical-align:middle;}
+.pp-table tr:last-child td{border-bottom:none;}
+.pp-table tr:hover td{background:#fafbfc;}
+.pp-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:999px;font-size:10px;font-weight:600;white-space:nowrap;}
+.pp-badge.uploading{background:#eff6ff;color:#1d4ed8;}
+.pp-badge.done{background:#dcfce7;color:#15803d;}
+.pp-badge.err{background:#fee2e2;color:#dc2626;}
+.pp-badge.na{background:#f3f4f6;color:#9CA3AF;}
+
 /* ── PREVIEW (proposal sheet) ── */
-.proposal-sheet{background:#fff;width:816px;min-height:1056px;box-shadow:0 8px 32px rgba(0,0,0,0.12);padding:56px 64px;font-size:11px;color:#1f2937;line-height:1.5;border-radius:4px;}
+.proposal-sheet{width:816px;font-size:11px;color:#1f2937;line-height:1.5;display:flex;flex-direction:column;gap:20px;}
+.pdf-page{background:#fff;padding:56px 64px;min-height:1056px;box-shadow:0 8px 32px rgba(0,0,0,0.12);border-radius:4px;box-sizing:border-box;}
 @media print {
   body{background:#fff;}
   .toolbar,.editor,.preview{display:none;}
-  .proposal-sheet{box-shadow:none;width:100%;min-height:auto;padding:0;border-radius:0;}
+  .proposal-sheet{width:100%;gap:0;}
+  .pdf-page{box-shadow:none;width:100%;min-height:auto;border-radius:0;break-after:page;}
   #printArea{display:block !important;}
 }
 
@@ -135,35 +190,42 @@ textarea{resize:vertical;min-height:60px;line-height:1.5;}
 .p-section-title{font-size:11px;font-weight:800;color:#111827;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #e5e7eb;}
 
 /* Line item table */
-.p-table{width:100%;border-collapse:collapse;margin-bottom:24px;table-layout:fixed;}
+.p-table{width:100%;border-collapse:collapse;margin-bottom:16px;table-layout:fixed;}
 .p-table thead{background:#f9fafb;}
-.p-table th{padding:9px 12px;text-align:left;font-size:9px;font-weight:700;color:#6B7280;letter-spacing:0.06em;text-transform:uppercase;}
+.p-table th{padding:7px 12px;text-align:left;font-size:9px;font-weight:700;color:#6B7280;letter-spacing:0.06em;text-transform:uppercase;}
 .p-table th:nth-child(2),.p-table th:nth-child(3),.p-table th:nth-child(4){text-align:right;}
-.p-table td{padding:10px 12px;font-size:11px;border-bottom:1px solid #f3f4f6;}
+.p-table td{padding:8px 12px;font-size:11px;border-bottom:1px solid #f3f4f6;}
 .p-table td:nth-child(2),.p-table td:nth-child(3),.p-table td:nth-child(4){text-align:right;}
 .p-table td:nth-child(4){font-weight:700;color:#111827;}
 .p-item-name{font-weight:600;color:#111827;}
-.p-item-desc{font-size:10px;color:#9CA3AF;margin-top:2px;line-height:1.45;}
-.p-group-row td{background:#fafbfc;font-size:9px;font-weight:800;color:#7C3AED;letter-spacing:0.06em;text-transform:uppercase;padding:6px 12px;}
+.p-item-desc{font-size:10px;color:#9CA3AF;margin-top:1px;line-height:1.4;}
+.p-group-row td{background:#fafbfc;font-size:9px;font-weight:800;color:#7C3AED;letter-spacing:0.06em;text-transform:uppercase;padding:5px 12px;}
 
-.p-totals{width:100%;border-collapse:collapse;margin-top:0;margin-bottom:24px;table-layout:fixed;}
+.p-totals{width:100%;border-collapse:collapse;margin-top:0;margin-bottom:16px;table-layout:fixed;}
 .p-totals colgroup col:first-child{width:54%;}
 .p-totals colgroup col:nth-child(2){width:14%;}
 .p-totals colgroup col:nth-child(3){width:16%;}
 .p-totals colgroup col:nth-child(4){width:16%;}
-.p-total-row td{padding:10px 12px;font-size:11px;color:#374151;vertical-align:middle;}
+.p-total-row td{padding:8px 12px;font-size:11px;color:#374151;vertical-align:middle;}
 .p-total-row td:last-child{white-space:nowrap;text-align:right;}
 .p-total-row.discount td{color:#0D9488;}
 .p-total-row.tax td{color:#6B7280;}
-.p-total-row.grand td{border-top:2px solid #111827;padding-top:10px;font-size:15px;font-weight:800;color:#111827;}
-.p-total-row.grand td:last-child{font-size:20px;color:#7C3AED;}
+.p-totals-body tr:first-child td{border-top:2px solid #e5e7eb;padding-top:12px;}
+.p-total-row.grand td{border-top:2px solid #111827;padding-top:8px;font-size:15px;font-weight:800;color:#111827;}
+.p-total-row.grand td:last-child{font-size:20px;color:#7C3AED;text-align:right;}
 
 .p-contract-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:24px 0;padding:16px;background:#f9fafb;border-radius:8px;}
 .p-contract-cell-label{font-size:9px;font-weight:700;color:#9CA3AF;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:4px;}
 .p-contract-cell-val{font-size:12px;font-weight:700;color:#111827;}
 
-.p-notes{font-size:10px;color:#6B7280;line-height:1.6;margin-bottom:28px;padding:14px 16px;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;}
+.p-notes{font-size:10px;color:#6B7280;line-height:1.6;margin-bottom:20px;padding:14px 16px;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;}
 .p-notes strong{color:#92400e;}
+.p-terms-block{font-size:10px;color:#374151;line-height:1.7;margin-bottom:20px;padding:14px 16px;background:#f9fafb;border-radius:8px;}
+.p-terms-sub{font-size:9px;font-weight:800;color:#111827;letter-spacing:0.08em;text-transform:uppercase;margin:12px 0 6px;}
+.p-terms-sub:first-child{margin-top:0;}
+.p-terms-block p{margin-bottom:8px;}
+.p-terms-block p:last-child{margin-bottom:0;}
+.p-link{color:#7C3AED;text-decoration:underline;word-break:break-all;}
 
 .p-sigs{display:grid;grid-template-columns:1fr 1fr;gap:48px;margin-top:36px;padding-top:24px;border-top:1px solid #e5e7eb;}
 .p-sig-line{margin-bottom:6px;border-bottom:1px solid #111827;height:32px;}
@@ -198,26 +260,42 @@ textarea{resize:vertical;min-height:60px;line-height:1.5;}
     <span class="tb-pill warn">Internal · Sales Tool</span>
   </div>
   <div class="tb-right">
+    <button class="tb-btn" onclick="openProposals()">📋 Proposals</button>
     <button class="tb-btn" onclick="resetForm()">↺ Reset</button>
     <button class="tb-btn primary" onclick="downloadPDF()" id="pdfBtn">📄 Download PDF</button>
   </div>
 </div>
 
 <!-- ─── PAGE ─── -->
-<div class="page">
+<div class="page" id="mainPage">
 
   <!-- ============== EDITOR PANEL ============== -->
   <div class="editor">
 
+    <div id="validationBanner" class="validation-banner" style="display:none;"></div>
+
     <!-- Live total card -->
     <div class="deal-summary-card">
       <div class="dsc-title">Annual contract value</div>
-      <div class="dsc-total">$<span id="dscTotal">0</span></div>
+      <div class="dsc-total"><span id="dscSym">$</span><span id="dscTotal">0</span></div>
       <div class="dsc-period" id="dscPeriod">— year, billed annually</div>
       <div class="dsc-breakdown">
         <div><div class="dsc-cell-label">Recurring / mo</div><div class="dsc-cell-val" id="dscMonthly">$0</div></div>
         <div><div class="dsc-cell-label">One-time</div><div class="dsc-cell-val" id="dscOneTime">$0</div></div>
         <div><div class="dsc-cell-label">Discount</div><div class="dsc-cell-val" id="dscDiscount" style="color:#0D9488;">$0</div></div>
+      </div>
+    </div>
+
+    <!-- Currency -->
+    <div class="editor-section">
+      <div class="section-head"><div class="section-title">Currency</div></div>
+      <div class="section-body">
+        <div class="currency-pills">
+          <button class="currency-pill on" data-currency="USD">$ USD</button>
+          <button class="currency-pill" data-currency="INR">₹ INR</button>
+          <button class="currency-pill" data-currency="GBP">£ GBP</button>
+        </div>
+        <div id="rateBox" class="rate-box" style="display:none;"></div>
       </div>
     </div>
 
@@ -304,7 +382,8 @@ textarea{resize:vertical;min-height:60px;line-height:1.5;}
         <div class="field-row">
           <div class="field">
             <label class="field-label">Proposal #</label>
-            <input type="text" id="propNum" value="NANO-2026-0847" oninput="renderProposal()"/>
+            <div class="prop-num-badge" id="propNumDisplay">—</div>
+            <input type="hidden" id="propNum"/>
           </div>
           <div class="field">
             <label class="field-label">Issued</label>
@@ -521,6 +600,23 @@ textarea{resize:vertical;min-height:60px;line-height:1.5;}
       </div>
     </div>
 
+    <!-- Signatory details -->
+    <div class="editor-section">
+      <div class="section-head"><div class="section-title">Signatory details</div></div>
+      <div class="section-body">
+        <div class="field-row">
+          <div class="field">
+            <label class="field-label">Name</label>
+            <input type="text" id="sigName" value="Loganathan K" oninput="renderProposal()"/>
+          </div>
+          <div class="field">
+            <label class="field-label">Role</label>
+            <input type="text" id="sigRole" value="COO" oninput="renderProposal()"/>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Terms & Notes -->
     <div class="editor-section">
       <div class="section-head"><div class="section-title">Notes &amp; terms</div></div>
@@ -543,132 +639,157 @@ textarea{resize:vertical;min-height:60px;line-height:1.5;}
   <div class="preview">
     <div class="proposal-sheet" id="printArea">
 
-      <!-- Header -->
-      <div class="p-header">
-        <div class="p-logo">
-          <div class="p-logo-mark">N</div>
-          <div class="p-logo-text">
-            <div class="p-logo-name">Nano LMS</div>
-            <div class="p-logo-sub">by Animaker, Inc.</div>
+      <!-- ── PAGE 1: Cover & Contract Details ── -->
+      <div class="pdf-page">
+
+        <div class="p-header">
+          <div class="p-logo">
+            <div class="p-logo-mark">N</div>
+            <div class="p-logo-text">
+              <div class="p-logo-name">Nano LMS</div>
+              <div class="p-logo-sub">by Animaker, Inc.</div>
+            </div>
+          </div>
+          <div class="p-meta">
+            <div class="p-meta-title">Proposal</div>
+            <div class="p-meta-line"><strong>#</strong> <span id="pNum">NANO-2026-0847</span></div>
+            <div class="p-meta-line"><strong>Issued:</strong> <span id="pDate">—</span></div>
+            <div class="p-meta-line"><strong>Valid through:</strong> <span id="pValid">—</span></div>
           </div>
         </div>
-        <div class="p-meta">
-          <div class="p-meta-title">Proposal</div>
-          <div class="p-meta-line"><strong>#</strong> <span id="pNum">NANO-2026-0847</span></div>
-          <div class="p-meta-line"><strong>Issued:</strong> <span id="pDate">—</span></div>
-          <div class="p-meta-line"><strong>Valid through:</strong> <span id="pValid">—</span></div>
-        </div>
-      </div>
 
-      <!-- Parties -->
-      <div class="p-parties">
-        <div>
-          <div class="p-party-label">Prepared by</div>
-          <div class="p-party-name">Nano LMS · Animaker, Inc.</div>
-          <div class="p-party-detail">
-            1160 Battery Street<br/> 
-            Suite 100<br/>
-            San Francisco, CA 94111<br/>
-            United States<br/>
-            <strong style="color:#111827;" id="pOwnerName">—</strong><br/>
-            <span id="pOwnerEmail">—</span>
+        <div class="p-parties">
+          <div>
+            <div class="p-party-label">Prepared by</div>
+            <div class="p-party-name">Nano LMS · Animaker, Inc.</div>
+            <div class="p-party-detail">
+              1160 Battery Street<br/>
+              Suite 100<br/>
+              San Francisco, CA 94111<br/>
+              United States<br/>
+              <strong style="color:#111827;" id="pOwnerName">—</strong><br/>
+              <span id="pOwnerEmail">—</span>
+            </div>
+          </div>
+          <div>
+            <div class="p-party-label">Prepared for</div>
+            <div class="p-party-name" id="pCustCompany">Acme Corporation</div>
+            <div class="p-party-detail">
+              <span id="pCustAddress">—</span><br/>
+              <strong style="color:#111827;" id="pCustContact">—</strong>, <span id="pCustRole">—</span><br/>
+              <span id="pCustEmail">—</span> · <span id="pCustPhone">—</span>
+            </div>
           </div>
         </div>
-        <div>
-          <div class="p-party-label">Prepared for</div>
-          <div class="p-party-name" id="pCustCompany">Acme Corporation</div>
-          <div class="p-party-detail">
-            <span id="pCustAddress">—</span><br/>
-            <strong style="color:#111827;" id="pCustContact">—</strong>, <span id="pCustRole">—</span><br/>
-            <span id="pCustEmail">—</span> · <span id="pCustPhone">—</span>
+
+        <div class="p-intro" id="pIntro">—</div>
+
+        <div class="p-section-title" style="margin-top:28px;">Contract details</div>
+        <div class="p-contract-grid">
+          <div>
+            <div class="p-contract-cell-label">Contract term</div>
+            <div class="p-contract-cell-val" id="pCTerm">2 years</div>
+          </div>
+          <div>
+            <div class="p-contract-cell-label">Billing cycle</div>
+            <div class="p-contract-cell-val" id="pCBilling">Annual upfront</div>
+          </div>
+          <div>
+            <div class="p-contract-cell-label">Start date</div>
+            <div class="p-contract-cell-val" id="pCStart">—</div>
+          </div>
+          <div>
+            <div class="p-contract-cell-label">Auto-renewal</div>
+            <div class="p-contract-cell-val">Yes · 30d notice</div>
           </div>
         </div>
+
       </div>
 
-      <!-- Intro -->
-      <div class="p-intro" id="pIntro">—</div>
+      <!-- ── PAGE 2: Investment Summary ── -->
+      <div class="pdf-page">
 
-      <!-- Investment summary -->
-      <div class="p-section-title">Investment summary</div>
-      <table class="p-table" id="pTable">
-        <thead>
-          <tr>
-            <th style="width:54%;">Item</th>
-            <th style="width:14%;">Qty</th>
-            <th style="width:16%;">Unit price</th>
-            <th style="width:16%;">Amount</th>
-          </tr>
-        </thead>
-        <tbody id="pTableBody"></tbody>
-      </table>
+        <div class="p-section-title">Investment summary</div>
+        <table class="p-table" id="pTable">
+          <thead>
+            <tr>
+              <th style="width:50%;">Item</th>
+              <th style="width:14%;">Qty</th>
+              <th style="width:16%;">Unit price</th>
+              <th style="width:20%;">Amount</th>
+            </tr>
+          </thead>
+          <tbody id="pTableBody"></tbody>
+          <tbody class="p-totals-body">
+            <tr class="p-total-row"><td colspan="3">Monthly subtotal</td><td id="pMonthly">$0.00</td></tr>
+            <tr class="p-total-row"><td colspan="3">Annual subtotal (recurring × <span id="pTerm">12</span>)</td><td id="pRecurringAnnual">$0.00</td></tr>
+            <tr class="p-total-row"><td colspan="3">Professional services (one-time)</td><td id="pOneTime">$0.00</td></tr>
+            <tr class="p-total-row discount" id="pDiscountRow" style="display:none;"><td colspan="3">Discount (<span id="pDiscPct">10</span>%)</td><td id="pDiscount">-$0.00</td></tr>
+            <tr class="p-total-row grand"><td colspan="3">Total contract value</td><td><span id="pGrandSym">$</span><span id="pGrand">0.00</span></td></tr>
+          </tbody>
+        </table>
 
-      <!-- Totals -->
-      <table class="p-totals" id="pTotals">
-        <colgroup>
-          <col />
-          <col />
-          <col />
-          <col />
-        </colgroup>
-        <tbody>
-          <tr class="p-total-row"><td colspan="3">Monthly subtotal</td><td id="pMonthly">$0.00</td></tr>
-          <tr class="p-total-row"><td colspan="3">Annual subtotal (recurring × <span id="pTerm">12</span>)</td><td id="pRecurringAnnual">$0.00</td></tr>
-          <tr class="p-total-row"><td colspan="3">Professional services (one-time)</td><td id="pOneTime">$0.00</td></tr>
-          <tr class="p-total-row discount" id="pDiscountRow" style="display:none;"><td colspan="3">Discount (<span id="pDiscPct">10</span>%)</td><td id="pDiscount">-$0.00</td></tr>
-          <tr class="p-total-row grand"><td colspan="3">Total contract value</td><td>$<span id="pGrand">0.00</span></td></tr>
-        </tbody>
-      </table>
-
-      <!-- Contract details -->
-      <div class="p-section-title" style="margin-top:24px;">Contract details</div>
-      <div class="p-contract-grid">
-        <div>
-          <div class="p-contract-cell-label">Contract term</div>
-          <div class="p-contract-cell-val" id="pCTerm">2 years</div>
-        </div>
-        <div>
-          <div class="p-contract-cell-label">Billing cycle</div>
-          <div class="p-contract-cell-val" id="pCBilling">Annual upfront</div>
-        </div>
-        <div>
-          <div class="p-contract-cell-label">Start date</div>
-          <div class="p-contract-cell-val" id="pCStart">—</div>
-        </div>
-        <div>
-          <div class="p-contract-cell-label">Auto-renewal</div>
-          <div class="p-contract-cell-val">Yes · 30d notice</div>
-        </div>
       </div>
 
-      <!-- Notes -->
-      <div class="p-notes" id="pSpecialTerms">—</div>
+      <!-- ── PAGE 3: Terms & Signatures ── -->
+      <div class="pdf-page">
 
-      <!-- Signatures -->
-      <div class="p-sigs">
-        <div>
-          <div class="p-sig-line"></div>
-          <div class="p-sig-label">Authorized signatory · <span id="pSigCust">Acme Corporation</span></div>
-          <div class="p-sig-name" id="pSigCustName">Sarah Johnson</div>
-          <div class="p-sig-role" id="pSigCustRole">VP, Learning &amp; Development</div>
+        <div class="p-section-title">Terms &amp; conditions</div>
+        <div class="p-terms-block">
+          <div class="p-terms-sub">Commercial Terms</div>
+          <p>The subscription term will renew automatically for successive terms unless terminated/ notified before renewal date in accordance with the terms of the Agreement. <a href="https://www.animaker.com/Terms" class="p-link" target="_blank">https://www.animaker.com/Terms</a></p>
+          <p>Custom Pricing offered for this subscription, Custom Characters will be delivered for the customers as per their need and will be charged as upfront payment.</p>
+          <div class="p-terms-sub">Terms</div>
+          <p>This Service Order Form is governed by the Animaker Terms of Service found at <a href="https://www.animaker.com/Terms" class="p-link" target="_blank">https://www.animaker.com/Terms</a></p>
+          <p>The continued activation of Customer's Account is based on the successful payment of the Fees within the agreed terms.</p>
         </div>
-        <div>
-          <div class="p-sig-line"></div>
-          <div class="p-sig-label">For Nano LMS · Animaker, Inc.</div>
-          <div class="p-sig-name" id="pSigOwnerName">—</div>
-          <div class="p-sig-role" id="pSigOwnerEmail">—</div>
+        <div class="p-notes" id="pSpecialTerms" style="display:none;">—</div>
+
+        <div class="p-sigs">
+          <div>
+            <div class="p-sig-line"></div>
+            <div class="p-sig-label">Authorized signatory · <span id="pSigCust">Acme Corporation</span></div>
+            <div class="p-sig-name" id="pSigCustName">Sarah Johnson</div>
+            <div class="p-sig-role" id="pSigCustRole">VP, Learning &amp; Development</div>
+            <div style="margin-top:16px;">
+              <div class="p-sig-line"></div>
+              <div class="p-sig-label">Date</div>
+            </div>
+          </div>
+          <div>
+            <div class="p-sig-line"></div>
+            <div class="p-sig-label">For Nano LMS · Animaker, Inc.</div>
+            <div class="p-sig-name" id="pSigName">Loganathan K</div>
+            <div class="p-sig-role" id="pSigRole">COO</div>
+            <div style="margin-top:16px;">
+              <div class="p-sig-line"></div>
+              <div class="p-sig-label">Date</div>
+            </div>
+          </div>
         </div>
+
+        <div class="p-footer">
+          <div>This proposal is confidential and prepared exclusively for the named recipient. Pricing is valid through the date listed above.</div>
+          <div style="margin-top:6px;">Nano LMS · animaker.com/nano · © 2026 Animaker, Inc.</div>
+        </div>
+
       </div>
 
-      <!-- Footer -->
-      <div class="p-footer">
-        <div>This proposal is confidential and prepared exclusively for the named recipient. Pricing is valid through the date listed above.</div>
-        <div style="margin-top:6px;">Nano LMS · animaker.com/nano · © 2026 Animaker, Inc.</div>
-      </div>
     </div>
   </div>
 </div>
 
 <script>
+// ── Auto-generate proposal number: NANO-YYYY-MMSS ──
+(function () {
+  const now = new Date();
+  const mm = String(now.getMinutes()).padStart(2, '0');
+  const ss = String(now.getSeconds()).padStart(2, '0');
+  const num = `NANO-${now.getFullYear()}-${mm}${ss}`;
+  document.getElementById('propNum').value = num;
+  document.getElementById('propNumDisplay').textContent = num;
+})();
+
 // ── Initial dates ──
 const today = new Date();
 const fmt = d => d.toISOString().split('T')[0];
@@ -677,6 +798,14 @@ const validDate = new Date(today); validDate.setDate(validDate.getDate() + 30);
 document.getElementById('propValid').value = fmt(validDate);
 const startDate = new Date(today); startDate.setDate(startDate.getDate() + 14);
 document.getElementById('dealStart').value = fmt(startDate);
+
+// ── Currency ──
+let currentCurrency = 'USD';
+let conversionRate = 1;
+const CURRENCIES = { USD: '$', INR: '₹', GBP: '£' };
+function sym() { return CURRENCIES[currentCurrency]; }
+function cvt(n) { return n * conversionRate; }
+let _lastGrandUSD = 0; // updated by renderProposal, read by downloadPDF
 
 // ── Discount pills ──
 let currentDiscount = 10;
@@ -702,14 +831,55 @@ document.getElementById('customDiscPct').addEventListener('input', e => {
   }
 });
 
+// ── Currency pills ──
+document.querySelectorAll('.currency-pill').forEach(pill => {
+  pill.addEventListener('click', async () => {
+    document.querySelectorAll('.currency-pill').forEach(p => p.classList.remove('on'));
+    pill.classList.add('on');
+    currentCurrency = pill.dataset.currency;
+    const rateBox = document.getElementById('rateBox');
+    if (currentCurrency === 'USD') {
+      conversionRate = 1;
+      rateBox.style.display = 'none';
+    } else {
+      rateBox.style.display = 'block';
+      rateBox.innerHTML = '⏳ Fetching today\'s rate…';
+      try {
+        const res = await fetch('https://api.exchangerate-api.com/v4/latest/USD');
+        const data = await res.json();
+        conversionRate = data.rates[currentCurrency];
+        const dateStr = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+        rateBox.innerHTML = `<strong>Today's rate:</strong> 1 USD = ${conversionRate.toLocaleString('en-US', { minimumFractionDigits: 4, maximumFractionDigits: 4 })} ${currentCurrency} <span style="opacity:0.65;font-size:10px;">(${dateStr})</span>`;
+      } catch (e) {
+        rateBox.innerHTML = '⚠️ Could not fetch live rate — amounts shown in USD.';
+        conversionRate = 1;
+      }
+    }
+    renderProposal();
+  });
+});
+
 // ── Toggle rows ──
 document.querySelectorAll('.toggle-row').forEach(row => {
   const cb = row.querySelector('input[type="checkbox"]');
-  row.addEventListener('click', e => {
-    if (e.target.tagName === 'INPUT') return;
-    cb.checked = !cb.checked;
+  if (!cb) return;
+  // initialize visual state from checkbox
+  row.classList.toggle('on', !!cb.checked);
+
+  // When checkbox changes (keyboard or programmatic), update UI and totals
+  cb.addEventListener('change', () => {
     row.classList.toggle('on', cb.checked);
     renderProposal();
+  });
+
+  // Make clicking the row toggle the checkbox in a controlled way
+  row.addEventListener('click', e => {
+    if (e.target.tagName === 'INPUT') return;
+    e.preventDefault();
+    cb.checked = !cb.checked;
+    row.classList.toggle('on', cb.checked);
+    // Manually dispatch change so other listeners react
+    cb.dispatchEvent(new Event('change', { bubbles: true }));
   });
 });
 
@@ -748,8 +918,8 @@ function renderProposal() {
   document.getElementById('pCustRole').textContent = val('custRole');
   document.getElementById('pOwnerName').textContent = val('ownerName') || '—';
   document.getElementById('pOwnerEmail').textContent = val('ownerEmail') || '—';
-  document.getElementById('pSigOwnerName').textContent = val('ownerName') || '—';
-  document.getElementById('pSigOwnerEmail').textContent = val('ownerEmail') || '—';
+  document.getElementById('pSigName').textContent = val('sigName') || '—';
+  document.getElementById('pSigRole').textContent = val('sigRole') || '—';
   document.getElementById('pCustEmail').textContent = val('custEmail');
   document.getElementById('pCustPhone').textContent = val('custPhone');
   document.getElementById('pSigCust').textContent = val('custCompany');
@@ -770,7 +940,14 @@ function renderProposal() {
   // Notes
   const introText = val('introNote');
   document.getElementById('pIntro').textContent = introText;
-  document.getElementById('pSpecialTerms').innerHTML = '<strong>Terms:</strong> ' + val('specialTerms');
+  const specialTermsEl = document.getElementById('pSpecialTerms');
+  const specialTermsVal = val('specialTerms').trim();
+  if (specialTermsVal) {
+    specialTermsEl.innerHTML = '<strong>Additional terms:</strong> ' + specialTermsVal;
+    specialTermsEl.style.display = '';
+  } else {
+    specialTermsEl.style.display = 'none';
+  }
   const introCounter = document.getElementById('introNoteCounter');
   if (introCounter) {
     introCounter.textContent = `${introText.length} / 180`;
@@ -839,39 +1016,42 @@ function renderProposal() {
   const beforeDiscount = totalRecurring + totalOneTime;
   const discountAmount = beforeDiscount * (currentDiscount / 100);
   const grandTotal = beforeDiscount - discountAmount;
+  _lastGrandUSD = grandTotal;
 
-  document.getElementById('pMonthly').textContent = '$' + fmtNum(monthlyRecurring);
-  document.getElementById('pRecurringAnnual').textContent = '$' + fmtNum(totalRecurring);
-  document.getElementById('pOneTime').textContent = '$' + fmtNum(totalOneTime);
+  document.getElementById('pMonthly').textContent = sym() + fmtNum(cvt(monthlyRecurring));
+  document.getElementById('pRecurringAnnual').textContent = sym() + fmtNum(cvt(totalRecurring));
+  document.getElementById('pOneTime').textContent = sym() + fmtNum(cvt(totalOneTime));
 
   if (currentDiscount > 0) {
     document.getElementById('pDiscountRow').style.display = 'table-row';
     document.getElementById('pDiscPct').textContent = currentDiscount;
-    document.getElementById('pDiscount').textContent = '-$' + fmtNum(discountAmount);
+    document.getElementById('pDiscount').textContent = '-' + sym() + fmtNum(cvt(discountAmount));
   } else {
     document.getElementById('pDiscountRow').style.display = 'none';
   }
-  document.getElementById('pGrand').textContent = fmtNum(grandTotal);
+  document.getElementById('pGrandSym').textContent = sym();
+  document.getElementById('pGrand').textContent = fmtNum(cvt(grandTotal));
 
   // Summary card
-  document.getElementById('dscTotal').textContent = fmtNum(grandTotal);
+  document.getElementById('dscSym').textContent = sym();
+  document.getElementById('dscTotal').textContent = fmtNum(cvt(grandTotal));
   document.getElementById('dscPeriod').textContent = `${termYears}-year contract, billed ${billing}`;
-  document.getElementById('dscMonthly').textContent = '$' + fmtNum(monthlyRecurring);
-  document.getElementById('dscOneTime').textContent = '$' + fmtNum(totalOneTime);
-  document.getElementById('dscDiscount').textContent = '-$' + fmtNum(discountAmount);
+  document.getElementById('dscMonthly').textContent = sym() + fmtNum(cvt(monthlyRecurring));
+  document.getElementById('dscOneTime').textContent = sym() + fmtNum(cvt(totalOneTime));
+  document.getElementById('dscDiscount').textContent = '-' + sym() + fmtNum(cvt(discountAmount));
 }
 
 function rowHTML(item) {
   return `<tr>
     <td><div class="p-item-name">${escapeHtml(item.name)}</div><div class="p-item-desc">${escapeHtml(item.desc)}</div></td>
     <td>${item.qty.toLocaleString()}</td>
-    <td>$${fmtNum(item.unit)} <span style="color:#9CA3AF;font-size:9px;">${item.period}</span></td>
-    <td>$${fmtNum(item.qty * item.unit)}</td>
+    <td>${sym()}${fmtNum(cvt(item.unit))} <span style="color:#9CA3AF;font-size:9px;">${item.period}</span></td>
+    <td>${sym()}${fmtNum(cvt(item.qty * item.unit))}</td>
   </tr>`;
 }
 
 function val(id) { return document.getElementById(id).value; }
-function fmtNum(n) { return n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+function fmtNum(n) { return n.toLocaleString(currentCurrency === 'INR' ? 'en-IN' : 'en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
 function formatDate(s) { if (!s) return '—'; return new Date(s + 'T00:00').toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}); }
 function escapeHtml(s) { return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]); }
 
@@ -881,34 +1061,298 @@ function resetForm() {
   location.reload();
 }
 
+// ── Google Drive config — paste your Apps Script deployment URL here ──
+// Deploy the companion Apps Script as a Web App (Execute as: Me, Access: Anyone)
+const GDRIVE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwUrFVZMCfIOHPmEsgfkC1fsoOmHvkV717CxcD04coWwdOwIzszs0jpH037sYgEhLTsKg/exec';  // e.g. 'https://script.google.com/macros/s/AKfy.../exec'
+
+async function _uploadToDrive(blob, filename, propId) {
+  if (!GDRIVE_SCRIPT_URL) return;
+  try {
+    // Convert PDF blob → base64 so it can travel in JSON
+    const base64 = await new Promise((resolve, reject) => {
+      const r = new FileReader();
+      r.onload = () => resolve(r.result.split(',')[1]);
+      r.onerror = reject;
+      r.readAsDataURL(blob);
+    });
+    const res = await fetch(GDRIVE_SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify({ filename, fileData: base64 })
+    });
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.error || 'upload failed');
+    _historySetDrive(propId, data.link, 'done');
+  } catch (e) {
+    _historySetDrive(propId, null, 'err');
+  }
+}
+
+// ── Proposal history (localStorage) ──
+const _HIST_KEY = 'nano_proposals_v1';
+function _getHistory() { try { return JSON.parse(localStorage.getItem(_HIST_KEY) || '[]'); } catch { return []; } }
+function _saveHistory(h) { localStorage.setItem(_HIST_KEY, JSON.stringify(h)); }
+function _addToHistory(meta) {
+  const h = _getHistory();
+  const i = h.findIndex(x => x.id === meta.id);
+  if (i >= 0) h[i] = meta; else h.unshift(meta);
+  _saveHistory(h);
+}
+function _historySetDrive(propId, link, status) {
+  const h = _getHistory();
+  const item = h.find(x => x.id === propId);
+  if (item) { item.driveLink = link; item.driveStatus = status; _saveHistory(h); }
+  if (document.getElementById('proposalsPage').classList.contains('open')) _renderProposals();
+}
+
+// ── Proposals page ──
+let _ppSortCol = 'date';
+let _ppSortDir = -1; // -1 = newest first
+
+function openProposals() {
+  document.getElementById('mainPage').style.display = 'none';
+  document.getElementById('proposalsPage').classList.add('open');
+  _renderProposals();
+}
+function closeProposals() {
+  document.getElementById('proposalsPage').classList.remove('open');
+  document.getElementById('mainPage').style.display = '';
+}
+function _ppSortBy(col) {
+  if (_ppSortCol === col) _ppSortDir *= -1; else { _ppSortCol = col; _ppSortDir = -1; }
+  _renderProposals();
+}
+
+function _renderProposals() {
+  const history = _getHistory();
+  const noGDrive = !GDRIVE_SCRIPT_URL;
+  const q = (document.getElementById('ppSearch')?.value || '').toLowerCase().trim();
+
+  let rows = history.filter(h => {
+    if (!q) return true;
+    return (h.id||'').toLowerCase().includes(q) ||
+           (h.company||'').toLowerCase().includes(q) ||
+           (h.creatorName||'').toLowerCase().includes(q) ||
+           (h.creatorEmail||'').toLowerCase().includes(q);
+  });
+
+  rows.sort((a, b) => {
+    let av, bv;
+    switch (_ppSortCol) {
+      case 'id':      av = a.id||'';           bv = b.id||'';           break;
+      case 'date':    av = a.date||'';          bv = b.date||'';         break;
+      case 'company': av = (a.company||'').toLowerCase(); bv = (b.company||'').toLowerCase(); break;
+      case 'acv':     av = +a.acv||0;           bv = +b.acv||0;          break;
+      case 'creator': av = (a.creatorName||'').toLowerCase(); bv = (b.creatorName||'').toLowerCase(); break;
+      default:        av = ''; bv = '';
+    }
+    if (av < bv) return -_ppSortDir;
+    if (av > bv) return  _ppSortDir;
+    return 0;
+  });
+
+  const countEl = document.getElementById('ppCount');
+  if (countEl) countEl.textContent = `${rows.length} proposal${rows.length !== 1 ? 's' : ''}`;
+
+  let html = '';
+  if (noGDrive) {
+    html += `<div class="pp-setup"><strong>Google Drive not configured.</strong> Deploy the companion Apps Script as a Web App and paste the URL into <code>GDRIVE_SCRIPT_URL</code> in this file's script section. <a href="https://script.google.com" target="_blank">Open Apps Script →</a></div>`;
+  }
+
+  if (!rows.length) {
+    html += `<div class="pp-empty">${history.length ? 'No proposals match your search.' : 'No proposals yet.<br/>Download your first proposal and it will appear here.'}</div>`;
+  } else {
+    const si = col => `<span class="sort-icon">${_ppSortCol === col ? (_ppSortDir === 1 ? '▲' : '▼') : '⬍'}</span>`;
+    html += `<div class="pp-table-wrap"><table class="pp-table"><thead><tr>
+      <th class="${_ppSortCol==='id'?'sorted':''}" onclick="_ppSortBy('id')">Proposal # ${si('id')}</th>
+      <th class="${_ppSortCol==='date'?'sorted':''}" onclick="_ppSortBy('date')">Date ${si('date')}</th>
+      <th class="${_ppSortCol==='company'?'sorted':''}" onclick="_ppSortBy('company')">Company ${si('company')}</th>
+      <th class="${_ppSortCol==='acv'?'sorted':''}" onclick="_ppSortBy('acv')">ACV ${si('acv')}</th>
+      <th class="${_ppSortCol==='creator'?'sorted':''}" onclick="_ppSortBy('creator')">Creator ${si('creator')}</th>
+      <th>Google Drive</th>
+    </tr></thead><tbody>`;
+    rows.forEach(h => {
+      const d = new Date(h.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      const acvLocale = h.currency === 'INR' ? 'en-IN' : 'en-US';
+      const acv = (h.sym||'$') + Number(h.acv).toLocaleString(acvLocale, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      let drive;
+      if (noGDrive) {
+        drive = `<span class="pp-badge na">— not configured</span>`;
+      } else if (h.driveStatus === 'done' && h.driveLink) {
+        drive = `<a href="${h.driveLink}" target="_blank" class="p-link" style="font-size:12px;font-weight:600;">↗ View in Drive</a>`;
+      } else if (h.driveStatus === 'err') {
+        drive = `<span class="pp-badge err">Upload failed</span>`;
+      } else {
+        drive = `<span class="pp-badge uploading">⏳ Uploading…</span>`;
+      }
+      const cName = h.creatorName || '—';
+      const cEmail = h.creatorEmail || '';
+      html += `<tr>
+        <td><strong style="color:#7C3AED;">${escapeHtml(h.id)}</strong></td>
+        <td style="color:#6B7280;">${d}</td>
+        <td style="font-weight:600;">${escapeHtml(h.company||'—')}</td>
+        <td style="font-weight:700;">${acv}</td>
+        <td><div style="font-weight:600;color:#111827;">${escapeHtml(cName)}</div>${cEmail ? `<div style="font-size:11px;color:#9CA3AF;">${escapeHtml(cEmail)}</div>` : ''}</td>
+        <td>${drive}</td>
+      </tr>`;
+    });
+    html += `</tbody></table></div>`;
+  }
+  document.getElementById('ppBody').innerHTML = html;
+}
+
+function _exportCSV() {
+  const history = _getHistory();
+  if (!history.length) { alert('No proposals to export.'); return; }
+  const headers = ['Proposal #', 'Date', 'Company', 'ACV', 'Currency', 'Creator Name', 'Creator Email', 'Google Drive Link'];
+  const rows = history.map(h => {
+    const d = new Date(h.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    const acvLocale = h.currency === 'INR' ? 'en-IN' : 'en-US';
+    const acv = (h.sym||'$') + Number(h.acv).toLocaleString(acvLocale, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    return [h.id||'', d, h.company||'', acv, h.currency||'USD', h.creatorName||'', h.creatorEmail||'', h.driveLink||''];
+  });
+  const csv = [headers, ...rows].map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `nano-proposals-${new Date().toISOString().split('T')[0]}.csv`;
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 100);
+}
+
+// ── PDF link annotations (keeps <a> tags clickable after html2canvas) ──
+function addLinkAnnotations(pdf, pageEl, pageWidth, pageHeight, naturalHeight) {
+  const links = pageEl.querySelectorAll('a[href]');
+  if (!links.length) return;
+  const elRect = pageEl.getBoundingClientRect();
+  let scale, xOff = 0;
+  if (naturalHeight > pageHeight) {
+    scale = pageHeight / elRect.height;
+    xOff = (pageWidth - pageWidth * (pageHeight / naturalHeight)) / 2;
+  } else {
+    scale = pageWidth / elRect.width;
+  }
+  links.forEach(a => {
+    const r = a.getBoundingClientRect();
+    pdf.link(
+      xOff + (r.left - elRect.left) * scale,
+      (r.top  - elRect.top)  * scale,
+      Math.max(r.width  * scale, 4),
+      Math.max(r.height * scale, 8),
+      { url: a.href }
+    );
+  });
+}
+
+// ── Form validation ──
+const _REQUIRED = [
+  { id: 'ownerName',    label: 'Owner name' },
+  { id: 'ownerEmail',   label: 'Owner email' },
+  { id: 'custCompany',  label: 'Company name' },
+  { id: 'custContact',  label: 'Primary contact' },
+  { id: 'custRole',     label: 'Contact role' },
+  { id: 'custEmail',    label: 'Contact email' },
+  { id: 'custPhone',    label: 'Phone' },
+  { id: 'custAddress1', label: 'Address line 1' },
+  { id: 'custCity',     label: 'City' },
+  { id: 'custCountry',  label: 'Country' },
+  { id: 'propDate',     label: 'Issue date' },
+  { id: 'propValid',    label: 'Valid until' },
+  { id: 'dealStart',    label: 'Start date' },
+];
+
+function _clearValidation() {
+  document.querySelectorAll('.field.has-error').forEach(f => f.classList.remove('has-error'));
+  const b = document.getElementById('validationBanner');
+  if (b) { b.style.display = 'none'; b.innerHTML = ''; }
+}
+
+function _validateForm() {
+  _clearValidation();
+  const missing = [];
+  _REQUIRED.forEach(({ id, label }) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const v = el.value.trim();
+    if (!v) {
+      missing.push(label);
+      el.closest('.field')?.classList.add('has-error');
+    } else if ((id === 'ownerEmail' || id === 'custEmail') && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) {
+      missing.push(label + ' (invalid format)');
+      el.closest('.field')?.classList.add('has-error');
+    }
+  });
+  return missing;
+}
+
+function _showValidationBanner(missing) {
+  const b = document.getElementById('validationBanner');
+  if (!b) return;
+  b.innerHTML = `<strong>⚠ Please complete these required fields before downloading:</strong><ul>${missing.map(m => `<li>${escapeHtml(m)}</li>`).join('')}</ul>`;
+  b.style.display = '';
+  document.querySelector('.editor').scrollTo({ top: 0, behavior: 'smooth' });
+}
+
 // ── PDF download ──
 async function downloadPDF() {
+  const missing = _validateForm();
+  if (missing.length) { _showValidationBanner(missing); return; }
+
   const btn = document.getElementById('pdfBtn');
   const orig = btn.innerHTML;
   btn.innerHTML = '⏳ Generating…';
   btn.disabled = true;
   try {
-    const el = document.getElementById('printArea');
-    const canvas = await html2canvas(el, { scale: 2, useCORS: true, backgroundColor: '#ffffff' });
-    const imgData = canvas.toDataURL('image/png');
     const { jsPDF } = window.jspdf;
     const pdf = new jsPDF({ unit: 'pt', format: 'letter' });
     const pageWidth = pdf.internal.pageSize.getWidth();
     const pageHeight = pdf.internal.pageSize.getHeight();
-    const imgWidth = pageWidth;
-    const imgHeight = (canvas.height * pageWidth) / canvas.width;
-    let heightLeft = imgHeight;
-    let position = 0;
-    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-    heightLeft -= pageHeight;
-    while (heightLeft > 0) {
-      position -= pageHeight;
-      pdf.addPage();
-      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
+    const pages = document.querySelectorAll('#printArea .pdf-page');
+    for (let i = 0; i < pages.length; i++) {
+      const canvas = await html2canvas(pages[i], { scale: 1.5, useCORS: true, backgroundColor: '#ffffff' });
+      const imgData = canvas.toDataURL('image/jpeg', 0.92);
+      const naturalHeight = (canvas.height * pageWidth) / canvas.width;
+      if (i > 0) pdf.addPage();
+      if (naturalHeight > pageHeight) {
+        const fitScale = pageHeight / naturalHeight;
+        const scaledW = pageWidth * fitScale;
+        const xOff = (pageWidth - scaledW) / 2;
+        pdf.addImage(imgData, 'JPEG', xOff, 0, scaledW, pageHeight);
+        addLinkAnnotations(pdf, pages[i], pageWidth, pageHeight, naturalHeight);
+      } else {
+        pdf.addImage(imgData, 'JPEG', 0, 0, pageWidth, naturalHeight);
+        addLinkAnnotations(pdf, pages[i], pageWidth, pageHeight, naturalHeight);
+      }
     }
     const filename = `${val('propNum') || 'proposal'}-${val('custCompany').replace(/\s+/g,'-').toLowerCase()}.pdf`;
-    pdf.save(filename);
+
+    // Trigger browser download via blob URL
+    const blob = pdf.output('blob');
+    const dlUrl = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = dlUrl; a.download = filename;
+    document.body.appendChild(a); a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(dlUrl), 100);
+
+    // Save to proposals history
+    const propMeta = {
+      id: val('propNum') || 'UNNAMED',
+      date: new Date().toISOString(),
+      company: val('custCompany'),
+      acv: cvt(_lastGrandUSD),
+      currency: currentCurrency,
+      sym: sym(),
+      filename,
+      creatorName: val('ownerName'),
+      creatorEmail: val('ownerEmail'),
+      driveLink: null,
+      driveStatus: GDRIVE_SCRIPT_URL ? 'uploading' : 'na'
+    };
+    _addToHistory(propMeta);
+
+    // Upload to Google Drive via Apps Script (async — doesn't block the download)
+    if (GDRIVE_SCRIPT_URL) _uploadToDrive(blob, filename, propMeta.id);
   } catch (err) {
     alert('PDF generation failed: ' + err.message);
   } finally {
@@ -919,6 +1363,37 @@ async function downloadPDF() {
 
 // Initial render
 renderProposal();
+
+// ── Required field asterisks + live error clearing ──
+_REQUIRED.forEach(({ id }) => {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const label = el.closest('.field')?.querySelector('.field-label');
+  if (label && !label.querySelector('.req')) {
+    const star = document.createElement('span');
+    star.className = 'req';
+    star.textContent = ' *';
+    label.appendChild(star);
+  }
+  const clear = () => { if (el.value.trim()) el.closest('.field')?.classList.remove('has-error'); };
+  el.addEventListener('input', clear);
+  el.addEventListener('change', clear);
+});
 </script>
+<!-- ── Proposals full page ── -->
+<div id="proposalsPage" class="proposals-page">
+  <div class="pp-head">
+    <div class="pp-head-left">
+      <button class="pp-btn outline" onclick="closeProposals()">← Back to Builder</button>
+      <div class="pp-head-title">Proposals</div>
+      <span class="pp-count" id="ppCount">0 proposals</span>
+    </div>
+    <div class="pp-head-actions">
+      <input class="pp-search" type="text" id="ppSearch" placeholder="Search proposal #, company, creator…" oninput="_renderProposals()"/>
+      <button class="pp-btn outline" onclick="_exportCSV()">⬇ Export CSV</button>
+    </div>
+  </div>
+  <div class="pp-body" id="ppBody"></div>
+</div>
 </body>
 </html>

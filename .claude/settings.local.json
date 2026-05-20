@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(netlify status *)",
+      "Bash(netlify deploy *)"
+    ]
+  }
+}
